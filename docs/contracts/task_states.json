@@ -1,0 +1,219 @@
+{
+  "version": "0.1-draft",
+  "note": "Contract graph only; guards and atomic persistence are not implemented.",
+  "states": [
+    "OPEN",
+    "CLAIMED",
+    "EXECUTING",
+    "INTERRUPTED",
+    "VALIDATING",
+    "AWAITING_REVIEW",
+    "PAID",
+    "REFUNDED"
+  ],
+  "initial": "OPEN",
+  "terminal": [
+    "PAID",
+    "REFUNDED"
+  ],
+  "policy": {
+    "start_within_minutes": 10,
+    "default_execution_hours": 24,
+    "resume_grace_minutes": 30,
+    "replacement_limit": 1,
+    "review_hours": 48
+  },
+  "transitions": [
+    {
+      "source": "OPEN",
+      "event": "claim",
+      "target": "CLAIMED",
+      "guards": [
+        "available_worker",
+        "unexpired_execution_deadline"
+      ],
+      "settlement": "none"
+    },
+    {
+      "source": "OPEN",
+      "event": "cancel_before_first_claim",
+      "target": "REFUNDED",
+      "guards": [
+        "requester",
+        "never_claimed"
+      ],
+      "settlement": "refund"
+    },
+    {
+      "source": "OPEN",
+      "event": "execution_expired",
+      "target": "REFUNDED",
+      "guards": [
+        "server_deadline_reached"
+      ],
+      "settlement": "refund"
+    },
+    {
+      "source": "CLAIMED",
+      "event": "start",
+      "target": "EXECUTING",
+      "guards": [
+        "current_claim_generation",
+        "within_start_deadline"
+      ],
+      "settlement": "none"
+    },
+    {
+      "source": "CLAIMED",
+      "event": "start_expired",
+      "target": "OPEN",
+      "guards": [
+        "server_start_deadline_reached",
+        "revoke_claim"
+      ],
+      "settlement": "none"
+    },
+    {
+      "source": "CLAIMED",
+      "event": "execution_expired",
+      "target": "REFUNDED",
+      "guards": [
+        "server_deadline_reached",
+        "revoke_claim"
+      ],
+      "settlement": "refund"
+    },
+    {
+      "source": "EXECUTING",
+      "event": "interrupt",
+      "target": "INTERRUPTED",
+      "guards": [
+        "current_claim_generation"
+      ],
+      "settlement": "none"
+    },
+    {
+      "source": "EXECUTING",
+      "event": "submit",
+      "target": "VALIDATING",
+      "guards": [
+        "current_claim_generation",
+        "within_execution_deadline"
+      ],
+      "settlement": "none"
+    },
+    {
+      "source": "EXECUTING",
+      "event": "execution_expired",
+      "target": "REFUNDED",
+      "guards": [
+        "server_deadline_reached",
+        "revoke_claim"
+      ],
+      "settlement": "refund"
+    },
+    {
+      "source": "INTERRUPTED",
+      "event": "resume",
+      "target": "EXECUTING",
+      "guards": [
+        "current_claim_generation",
+        "within_resume_deadline",
+        "within_execution_deadline"
+      ],
+      "settlement": "none"
+    },
+    {
+      "source": "INTERRUPTED",
+      "event": "replace",
+      "target": "OPEN",
+      "guards": [
+        "resume_deadline_reached",
+        "replacement_available",
+        "within_execution_deadline",
+        "revoke_claim"
+      ],
+      "settlement": "none"
+    },
+    {
+      "source": "INTERRUPTED",
+      "event": "cannot_complete",
+      "target": "REFUNDED",
+      "guards": [
+        "resume_deadline_reached",
+        "replacement_exhausted",
+        "revoke_claim"
+      ],
+      "settlement": "refund"
+    },
+    {
+      "source": "INTERRUPTED",
+      "event": "execution_expired",
+      "target": "REFUNDED",
+      "guards": [
+        "server_deadline_reached",
+        "revoke_claim"
+      ],
+      "settlement": "refund"
+    },
+    {
+      "source": "VALIDATING",
+      "event": "checks_ready",
+      "target": "AWAITING_REVIEW",
+      "guards": [
+        "required_checks_satisfied",
+        "artifacts_accessible"
+      ],
+      "settlement": "none"
+    },
+    {
+      "source": "VALIDATING",
+      "event": "checks_failed_retry",
+      "target": "EXECUTING",
+      "guards": [
+        "current_claim_generation",
+        "within_execution_deadline"
+      ],
+      "settlement": "none"
+    },
+    {
+      "source": "VALIDATING",
+      "event": "cannot_complete",
+      "target": "REFUNDED",
+      "guards": [
+        "required_checks_unsatisfied",
+        "server_deadline_reached"
+      ],
+      "settlement": "refund"
+    },
+    {
+      "source": "AWAITING_REVIEW",
+      "event": "approve",
+      "target": "PAID",
+      "guards": [
+        "requester",
+        "before_review_deadline"
+      ],
+      "settlement": "payout"
+    },
+    {
+      "source": "AWAITING_REVIEW",
+      "event": "issue",
+      "target": "REFUNDED",
+      "guards": [
+        "requester",
+        "before_review_deadline"
+      ],
+      "settlement": "refund"
+    },
+    {
+      "source": "AWAITING_REVIEW",
+      "event": "auto_pay",
+      "target": "PAID",
+      "guards": [
+        "server_review_deadline_reached"
+      ],
+      "settlement": "payout"
+    }
+  ]
+}

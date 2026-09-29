@@ -1,0 +1,56 @@
+{
+  "name": "tokenisgold",
+  "private": true,
+  "version": "0.5.0",
+  "type": "module",
+  "engines": {
+    "node": ">=24.0.0 <25"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "node --env-file-if-exists=.env --import tsx scripts/dev.ts",
+    "dev:api": "node --env-file-if-exists=.env --import tsx --watch apps/api/src/main.ts",
+    "dev:web": "vite --config apps/web/vite.config.ts",
+    "build": "tsc && vite build --config apps/web/vite.config.ts",
+    "typecheck": "tsc --noEmit",
+    "start": "node --env-file-if-exists=.env build/apps/api/src/main.js",
+    "worker": "node --env-file-if-exists=.env --import tsx apps/worker/src/main.ts",
+    "db:migrate": "node --env-file-if-exists=.env --import tsx packages/db/src/migrate.ts",
+    "db:seed": "node --env-file-if-exists=.env --import tsx scripts/seed.ts",
+    "tig": "node --env-file-if-exists=.env --import tsx apps/cli/src/main.ts",
+    "test": "node --env-file-if-exists=.env --import tsx --test --test-concurrency=1 tests/*.test.ts",
+    "test:e2e": "node --env-file-if-exists=.env node_modules/@playwright/test/cli.js test",
+    "check": "npm run typecheck && npm test",
+    "cli:pack": "tsc && node scripts/package-cli.mjs",
+    "cli:install": "npm run cli:pack && node scripts/install-cli.mjs",
+    "pretest": "tsc"
+  },
+  "dependencies": {
+    "@fastify/cookie": "11.1.2",
+    "@fastify/rate-limit": "11.2.0",
+    "@fastify/static": "10.1.3",
+    "chokidar": "5.0.0",
+    "commander": "15.0.0",
+    "fastify": "5.12.3",
+    "lucide-react": "1.43.0",
+    "pg": "8.23.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "zod": "4.5.4"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "@types/node": "26.5.0",
+    "@types/pg": "8.23.1",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.7",
+    "@vitejs/plugin-react": "6.1.1",
+    "prettier": "3.9.6",
+    "tsx": "4.23.13",
+    "typescript": "7.0.2",
+    "vite": "8.2.2"
+  }
+}

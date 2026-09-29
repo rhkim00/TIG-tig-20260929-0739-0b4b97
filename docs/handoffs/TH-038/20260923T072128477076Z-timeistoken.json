@@ -1,0 +1,51 @@
+{
+  "task": "TH-038",
+  "status": "REVIEW",
+  "summary": [
+    "사용자 피드백(첫 실사용) 반영: 폴더 초기 커밋 안내, 저장소 설명·'Connecting this project'·'Project connected', 리뷰 화면의 Destination/Tree/New by folder/After approval/답변 안내 줄을 화면에서 제거(details에서만 표시). 완료 화면에 Repository/Request/Task 링크 표시. 폴더 이름 매칭 목록을 답할 때마다 다시 읽어 tig가 묻는 동안 만든 폴더도 찾는다.",
+    "실사용에서 난 INVALID_INPUT은 9/20에 시작된 개발 서버(tmux tokenisgold-dev)가 옛 계약(gitRequest.branch에 main 불허)으로 돌고 있어서였다. 이 브랜치로 서버를 재시작했고, 이미 만들어진 저장소 timeistoken/example-tig-20260923-0706-6bbad9와 push·project·artifact는 plan에 기록돼 있어 tig 재실행 시 task 등록만 재시도한다.",
+    "DB 테스트 실행: 다른 clone의 .env(TEST_DATABASE_URL, 로컬 postgres 55432)로 tests/api.test.ts 36개와 requester 설치 CLI 테스트(PTY 시나리오 포함) 통과. 테스트의 가짜 GitHub를 요청별 bare 저장소로 바꿨다."
+  ],
+  "checks": [
+    {
+      "command": "npx tsc; node --env-file=<other clone .env> --import tsx --test tests/api.test.ts tests/requester.test.ts",
+      "result": "passed",
+      "details": "DB 필요 테스트 54개 전부 통과(실제 HTTP/DB/PTY, GitHub 경계만 로컬 bare 저장소)."
+    },
+    {
+      "command": "node --import tsx --test tests/*.test.ts (위 두 파일 제외); python3 scripts/check_workspace.py; git diff --check; npm run cli:install",
+      "result": "passed",
+      "details": "나머지 테스트 통과, 설치 CLI 갱신."
+    },
+    {
+      "command": "실제 GitHub 저장소 생성·push (사용자 실사용)",
+      "result": "passed",
+      "details": "사용자의 tig 실행에서 timeistoken/example-tig-20260923-0706-6bbad9가 생성·push되고 project/artifact 등록까지 성공; task 등록은 옛 서버의 422로 실패 → 서버 재시작 후 재시도 대상."
+    }
+  ],
+  "blockers": [],
+  "next": {
+    "timeistoken": {
+      "task": "TH-038",
+      "action": "tig 재실행으로 대기 중인 요청 게시 마무리 확인; 리뷰 후 push/PR",
+      "dependsOn": "재시작된 개발 서버"
+    },
+    "rhkim00": {
+      "task": "TH-030",
+      "action": "TH-038 PR 리뷰",
+      "dependsOn": "TH-038 공유"
+    }
+  },
+  "schemaVersion": 1,
+  "author": "timeistoken",
+  "createdAt": "2026-09-23T07:21:28.472194+00:00",
+  "branch": "feat/TH-038-requester-flow",
+  "baseCommit": "001ca611959a049c725c09e728485500278d6f71",
+  "files": [
+    "apps/cli/src/wizard.ts",
+    "docs/REQUESTER_QUICKSTART.md",
+    "docs/USER_GUIDE.md",
+    "tests/requester.test.ts",
+    "tests/wizard.test.ts"
+  ]
+}

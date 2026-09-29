@@ -1,0 +1,10 @@
+ALTER TABLE tasks ADD COLUMN worker_id uuid REFERENCES users(id);
+ALTER TABLE tasks ADD COLUMN claim_generation integer NOT NULL DEFAULT 0;
+ALTER TABLE tasks ADD COLUMN replacement_count integer NOT NULL DEFAULT 0 CHECK(replacement_count BETWEEN 0 AND 1);
+ALTER TABLE tasks ADD COLUMN phase_due_at timestamptz;
+ALTER TABLE tasks ADD COLUMN submitted_at timestamptz;
+ALTER TABLE tasks ADD COLUMN review_due_at timestamptz;
+ALTER TABLE tasks ADD COLUMN submission jsonb;
+ALTER TABLE tasks ADD COLUMN development_fixture boolean NOT NULL DEFAULT false;
+CREATE UNIQUE INDEX worker_one_active ON tasks(worker_id) WHERE state IN ('CLAIMED','EXECUTING','INTERRUPTED','VALIDATING');
+CREATE INDEX tasks_due ON tasks(state,phase_due_at,review_due_at,execution_deadline_at) WHERE state NOT IN ('PAID','REFUNDED');

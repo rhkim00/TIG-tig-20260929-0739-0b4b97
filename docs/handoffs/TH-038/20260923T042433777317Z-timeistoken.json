@@ -1,0 +1,57 @@
+{
+  "task": "TH-038",
+  "status": "IN_PROGRESS",
+  "summary": [
+    "2단계 파일 범위: 요청 브랜치에 작업 트리 전체가 실린다. request-tree.ts의 미추적 파일 네 규칙(데이터 확장자, git이 추적하지 않는 폴더, 1 MB 초과, 300개/20 MB 예산)과 관련 상수·untrackedSkipReason을 제거. 새 파일은 이름·폴더·크기와 무관하게 GitHub 한계(100 MB/파일, 1 GB/트리)까지 올라간다.",
+    "유지: protected path(.env, 키, *.log, node_modules, .github/workflows 등), secret gate(비밀 패턴 파일은 held back), LFS·심볼릭 링크·중첩 저장소·읽기 불가·삭제 파일 제외. 리뷰 화면의 'Left out, not in git' 줄 제거, 새 파일 안내 문구 갱신. 스키마의 skipped* 필드는 이전 plan 호환을 위해 유지(항상 0/[]).",
+    "테스트: request-tree.test.ts 규칙·예산 테스트를 전체 파일 게시 기준으로 재작성(수천 개 새 파일 읽기·비밀 held·읽기 불가 명명 포함), wizard/requester/files 테스트 갱신."
+  ],
+  "checks": [
+    {
+      "command": "npx tsc --noEmit",
+      "result": "passed",
+      "details": "Node 24.20.0 기준 타입 검사 통과."
+    },
+    {
+      "command": "node --import tsx --test tests/*.test.ts (api.test.ts 제외)",
+      "result": "passed",
+      "details": "321개 중 320 통과. 실패 1건은 TEST_DATABASE_URL이 없는 이 서버의 DB 필요 테스트(기준선과 동일)."
+    },
+    {
+      "command": "python3 scripts/check_workspace.py; git diff --check",
+      "result": "passed",
+      "details": "협업 문서·whitespace 통과."
+    },
+    {
+      "command": "tests/api.test.ts; npm run test:e2e; 실제 대용량 저장소 게시",
+      "result": "not_run",
+      "details": "DB·브라우저 없는 환경. 수만 개 미추적 파일을 가진 실제 저장소에서의 소요 시간은 미측정(이제 모든 새 파일을 읽어 비밀 스캔하므로 이전보다 느릴 수 있음)."
+    }
+  ],
+  "blockers": [],
+  "next": {
+    "timeistoken": {
+      "task": "TH-038",
+      "action": "3단계 요청별 새 저장소: requester.ts publish 시 저장소 생성·main 브랜치 push, wizard.ts 목적지 선택 제거, apps/api project 행 요청별 생성. 이후 USER_GUIDE/REQUESTER_QUICKSTART 갱신",
+      "dependsOn": "이 commit의 2단계"
+    },
+    "rhkim00": {
+      "task": "TH-030",
+      "action": "웹의 요청 상세/파일 안내 문구가 전체 파일 게시와 맞는지 확인; TH-038 PR 리뷰",
+      "dependsOn": "feat/TH-038-requester-flow 공유"
+    }
+  },
+  "schemaVersion": 1,
+  "author": "timeistoken",
+  "createdAt": "2026-09-23T04:24:33.770309+00:00",
+  "branch": "feat/TH-038-requester-flow",
+  "baseCommit": "0f51cef8f8696af351f4312705fefea858894e8d",
+  "files": [
+    "apps/cli/src/request-tree.ts",
+    "apps/cli/src/wizard.ts",
+    "tests/files.test.ts",
+    "tests/request-tree.test.ts",
+    "tests/requester.test.ts",
+    "tests/wizard.test.ts"
+  ]
+}

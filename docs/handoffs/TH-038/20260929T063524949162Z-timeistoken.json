@@ -1,0 +1,46 @@
+{
+  "task": "TH-038",
+  "status": "REVIEW",
+  "summary": [
+    "사용자 규칙(9/29): tig는 실행할 때마다 새 요청이다. 이전 실행의 준비된 요청을 이어받는 경로('A prepared request is waiting', 'Continuing your saved request'), 세션 파일(requester-sessions), 이전 보상 금액 Enter 기본값(prefs.lastReward)을 제거. 요청 상태는 한 실행 안에서만 메모리에 산다. later/new는 게시하지 않고 종료하며 다음 실행은 처음부터 묻는다(준비된 plan은 디스크에 남아 tig request show/publish의 스크립트 경로로만 쓰인다). 오류 종료 문구도 '다음 tig는 새 요청'으로 통일.",
+    "테스트: wizard 흐름 테스트를 실행별 독립으로 재작성, DB 테스트의 가짜 GitHub를 gh repo create가 요청별 bare 저장소를 만드는 방식으로 바꾸고 PTY 시나리오를 두 번의 독립 실행(later → 게시 없음, 재실행 → 새 저장소에 게시)으로 갱신. 문서·한국어 help 갱신."
+  ],
+  "checks": [
+    {
+      "command": "npx tsc; node --import tsx --test tests/*.test.ts (api 제외; requester는 DB 포함); python3 scripts/check_workspace.py; git diff --check; npm run cli:install",
+      "result": "passed",
+      "details": "비-DB 전부·requester DB/PTY 18개 통과, 설치 CLI 갱신."
+    },
+    {
+      "command": "tests/api.test.ts",
+      "result": "not_run",
+      "details": "이번 변경은 CLI 대화 흐름과 테스트 픽스처만 건드림; 서버 코드 변경 없음(직전 commit에서 36개 통과)."
+    }
+  ],
+  "blockers": [],
+  "next": {
+    "timeistoken": {
+      "task": "TH-038",
+      "action": "설치된 tig로 매 실행 새 요청 흐름 확인; 리뷰 후 push/PR",
+      "dependsOn": "feat/TH-038-requester-flow"
+    },
+    "rhkim00": {
+      "task": "TH-030",
+      "action": "TH-038 PR 리뷰",
+      "dependsOn": "TH-038 공유"
+    }
+  },
+  "schemaVersion": 1,
+  "author": "timeistoken",
+  "createdAt": "2026-09-29T06:35:24.943956+00:00",
+  "branch": "feat/TH-038-requester-flow",
+  "baseCommit": "8a434fd9852e0ecfc554b3a947863f5aa2e13e84",
+  "files": [
+    "apps/cli/src/help.ts",
+    "apps/cli/src/wizard.ts",
+    "docs/REQUESTER_QUICKSTART.md",
+    "docs/USER_GUIDE.md",
+    "tests/requester.test.ts",
+    "tests/wizard.test.ts"
+  ]
+}

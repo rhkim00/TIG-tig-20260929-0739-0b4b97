@@ -1,0 +1,37 @@
+{
+  "task": "TH-029",
+  "status": "IN_PROGRESS",
+  "summary": [
+    "사용자 요청에 따라 Day 1~2 기반을 확인하고 CLI 설치 및 두 계정 거래 테스트 구현을 시작합니다."
+  ],
+  "checks": [
+    {
+      "command": "git status --short; team.py sync",
+      "result": "passed",
+      "details": "TH-028 기반의 새 브랜치, 원격 PR 1~4와 인수인계 확인"
+    }
+  ],
+  "blockers": [
+    "실제 AI runner와 제공사 구독 검증은 별도 후속이며 개발용 거래를 명확히 표시합니다."
+  ],
+  "next": {
+    "timeistoken": {
+      "task": "TH-029",
+      "action": "거래 상태·정산·CLI 설치·웹 통합 구현",
+      "dependsOn": "TH-028 stacked 기준"
+    },
+    "rhkim00": {
+      "task": "TH-030",
+      "action": "웹 UX 요구 정리, 첫 통합 후 준비 브랜치에서 구현",
+      "dependsOn": "TH-029 최초 웹 연결 인계"
+    }
+  },
+  "schemaVersion": 1,
+  "author": "timeistoken",
+  "createdAt": "2026-09-09T18:46:39.122171+00:00",
+  "branch": "feat/TH-029-task-lifecycle",
+  "baseCommit": "1f65e36b3df8e609b766334ede92d4707591ba10",
+  "files": [
+    "docs/coordination/tasks/TH-029.md"
+  ]
+}

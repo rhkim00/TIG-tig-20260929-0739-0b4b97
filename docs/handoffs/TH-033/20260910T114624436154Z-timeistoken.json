@@ -1,0 +1,52 @@
+{
+  "task": "TH-033",
+  "status": "REVIEW",
+  "summary": [
+    "CI trace에서 마지막 모바일 새로고침의 HTTP429를 확인. DB reset과 달리 같은 loopback IP의 요청 제한 카운터가 누적되어 발생.",
+    "테스트 앱 생성자에만 시나리오별 rate-limit key를 주입하고 DB reset과 함께 Git tree fixture를 초기화. 실제 request IP/auth와 제품 기본 rate limit 유지.",
+    "브라우저 회귀에서 제한 초과429와 시나리오 reset 뒤복구를 확인. 검증 보고에 CI 실패·수정 근거 추가."
+  ],
+  "checks": [
+    {
+      "command": "gh run view 34472393353 --log-failed; downloaded browser trace network inspection",
+      "result": "failed",
+      "details": "첫 CI 5/6 E2E 통과, 마지막 모바일 조회 HTTP429. 앱/설치 CLI44개와 다른 CI는 성공."
+    },
+    {
+      "command": "npm run typecheck; npm run test:e2e",
+      "result": "passed",
+      "details": "수정 후6개 통과. 새 요청 제한/시나리오 격리 회귀 포함. 제품의 IP 인증조건 유지."
+    },
+    {
+      "command": "python3 scripts/check_workspace.py; git diff --check",
+      "result": "passed",
+      "details": "검증 보고 링크와 whitespace 확인."
+    }
+  ],
+  "blockers": [
+    "외부 공개 GitHub 쓰기/실제 AI 대화 게시 확인과 실제 수행자 실행은 기존 보고의 잔여 범위 유지."
+  ],
+  "next": {
+    "timeistoken": {
+      "task": "TH-033",
+      "action": "최종 PR CI 확인 후 사용자 지정 공개 테스트 프로젝트의 자연어 게시 검증으로 인계",
+      "dependsOn": "이번 CI 격리 수정의 원격 통과"
+    },
+    "rhkim00": {
+      "task": "TH-030",
+      "action": "최신 PR8 요청 계약과CLI안내를읽고 기존웹온보딩범위 진행",
+      "dependsOn": "공유브랜치/인수인계 확인"
+    }
+  },
+  "schemaVersion": 1,
+  "author": "timeistoken",
+  "createdAt": "2026-09-10T11:46:24.429636+00:00",
+  "branch": "feat/TH-033-requester-git",
+  "baseCommit": "758d98d7d293d7a604b28d38cee0413f4a90a443",
+  "files": [
+    "apps/api/src/app.ts",
+    "docs/verification/TH-033-requester-git.md",
+    "tests/e2e/server.ts",
+    "tests/e2e/workspace.spec.ts"
+  ]
+}

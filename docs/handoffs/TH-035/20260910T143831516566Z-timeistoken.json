@@ -1,0 +1,41 @@
+{
+  "task": "TH-035",
+  "status": "IN_PROGRESS",
+  "summary": [
+    "사용자 요청에 따른 게시 검증/질문 최소화/수행자 첫 구현 범위 등록. TH034 REVIEW 유지, PR9 위 후속."
+  ],
+  "checks": [
+    {
+      "command": "team sync; check_workspace.py; check_workflow.py",
+      "result": "passed",
+      "details": "깨끗한 PR9 기반, 35작업 DAG/배정/문서 확인."
+    }
+  ],
+  "blockers": [
+    "현재 호스트의 코드 실행 격리 불가. 일반 거래의 필수 검사/정산 guard 유지."
+  ],
+  "next": {
+    "timeistoken": {
+      "task": "TH-035",
+      "action": "요청자 UX 개선과 본인 요청 실제 AI 코드 작성·로컬 Git 결과 체험 구현",
+      "dependsOn": "TH034 요청/AI adapter와 현재 격리 제약"
+    },
+    "rhkim00": {
+      "task": "TH-030",
+      "action": "기존 웹 온보딩 범위 유지하고 새 CLI 인계 확인",
+      "dependsOn": "최신 PR와 사용자 배정"
+    }
+  },
+  "schemaVersion": 1,
+  "author": "timeistoken",
+  "createdAt": "2026-09-10T14:38:31.509755+00:00",
+  "branch": "feat/TH-035-worker-trial",
+  "baseCommit": "e49e349c5a38e6482925cdbb4b7c1ab8bd28266b",
+  "files": [
+    "docs/coordination/BOARD.md",
+    "docs/coordination/NOW.md",
+    "docs/coordination/assignments.json",
+    "docs/coordination/tasks/TH-035.md",
+    "docs/product/00_confirmed.md"
+  ]
+}

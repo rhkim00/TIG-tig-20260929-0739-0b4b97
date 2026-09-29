@@ -1,0 +1,53 @@
+{
+  "task": "TH-030",
+  "status": "REVIEW",
+  "summary": [
+    "사용자 피드백(2026-09-14): Git 프로젝트 안에서 tig를 실행하면 폴더 질문을 생략(홈 폴더·비프로젝트·tig setup은 질문 유지)",
+    "작업 설명에 빈 Enter = 자동 초안(auto/자동도 유지), 증거 확인 질문의 Enter 기본값 yes(Terminal.confirm에 fallback 인자 추가) — 프로젝트 안에서 tig → Enter → Enter로 초안까지",
+    "requester PTY 테스트에서 폴더 단계 제거(프로젝트 폴더에서 시작하므로 더 이상 묻지 않음), 문서·계약·사용 안내 갱신"
+  ],
+  "checks": [
+    {
+      "command": "npx tsc --noEmit; npm test (실제 PostgreSQL)",
+      "result": "passed",
+      "details": "96/96"
+    },
+    {
+      "command": "실제 실행: 샘플 프로젝트 안에서 tig → Enter → Enter → Claude Code 초안 → 추천 Enter → 준비(게시 보류)",
+      "result": "passed",
+      "details": "폴더 질문 없음, 제목 'Add zero-division guard to div() and pytest coverage for sub() and div() in calc.py'"
+    },
+    {
+      "command": "python3 scripts/check_workspace.py; git diff --check",
+      "result": "passed",
+      "details": "문서 링크·공백 통과"
+    }
+  ],
+  "blockers": [],
+  "next": {
+    "timeistoken": {
+      "task": "TH-036",
+      "action": "폴더 생략·Enter=auto UX가 P-022(명확할 때만 확인 없이 진행)와 어긋나지 않는지 리뷰 후 병합",
+      "dependsOn": "이 PR 리뷰"
+    },
+    "rhkim00": {
+      "task": "TH-030",
+      "action": "Codex Stop hook, 웹 온보딩 화면에 doctor/auto 안내",
+      "dependsOn": "유찬 리뷰"
+    }
+  },
+  "schemaVersion": 1,
+  "author": "rhkim00",
+  "createdAt": "2026-09-14T01:36:10.805144+00:00",
+  "branch": "feat/TH-030-web-product",
+  "baseCommit": "8a88c67807457c945b90266348ad8f303cc5f644",
+  "files": [
+    "apps/cli/src/terminal.ts",
+    "apps/cli/src/wizard.ts",
+    "docs/DEVELOPMENT.md",
+    "docs/USER_GUIDE.md",
+    "docs/contracts/day4.md",
+    "docs/coordination/tasks/TH-030.md",
+    "tests/requester.test.ts"
+  ]
+}

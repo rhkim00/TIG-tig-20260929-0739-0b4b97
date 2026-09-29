@@ -1,0 +1,43 @@
+{
+  "task": "TH-035",
+  "status": "REVIEW",
+  "summary": [
+    "CI의 상대 TIG_TEST_CLI 경로를 임시 프로젝트 cwd로 해석하던 worker PTY 테스트 오류 수정. 제품 CLI는 변경 없음."
+  ],
+  "checks": [
+    {
+      "command": "gh run view 34492676695 --log-failed",
+      "result": "failed",
+      "details": "69개 중68개 통과, 새 worker PTY만 MODULE_NOT_FOUND. 브라우저 단계 미실행."
+    },
+    {
+      "command": "TIG_TEST_CLI=.local/cli-package/apps/cli/src/main.js node --import tsx --test tests/work.test.ts",
+      "result": "passed",
+      "details": "상대 경로의 실제 패키지 코드로 worker 8개 통과."
+    }
+  ],
+  "blockers": [
+    "일반 거래의 실행 격리/필수 검사 및 구독 추론 실증은 기존 인계대로 후속."
+  ],
+  "next": {
+    "timeistoken": {
+      "task": "TH-035",
+      "action": "최종 CI 확인 후 tig work 개인 체험과 다음 격리/검사 환경 연결",
+      "dependsOn": "이번 상대경로 수정 CI 통과, main병합은유찬결정"
+    },
+    "rhkim00": {
+      "task": "TH-030",
+      "action": "새 CLI 개인체험/설치/결과 UX 안내 확인",
+      "dependsOn": "PR10 사용법과 계약"
+    }
+  },
+  "schemaVersion": 1,
+  "author": "timeistoken",
+  "createdAt": "2026-09-10T15:01:36.340814+00:00",
+  "branch": "feat/TH-035-worker-trial",
+  "baseCommit": "d86345c54a839d32e74dd2490c4654a48f17b3cf",
+  "files": [
+    "docs/verification/TH-035-worker-trial.md",
+    "tests/work.test.ts"
+  ]
+}

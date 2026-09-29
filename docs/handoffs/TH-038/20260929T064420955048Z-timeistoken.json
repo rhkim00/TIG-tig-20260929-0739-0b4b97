@@ -1,0 +1,41 @@
+{
+  "task": "TH-038",
+  "status": "REVIEW",
+  "summary": [
+    "사용자 요청(9/29): tig 시작 시 로그인 확인. 폴더 확인 직후 GitHub CLI 계정을 이름으로 보여 주고 그 계정 아래에 요청 저장소를 만들지 매 실행 확인한다(no → gh auth login --web으로 다른 계정 로그인 후 재확인; 미로그인이면 먼저 로그인 제안, 거절 시 중단). 이 터미널이 timeistoken으로 로그인돼 있어 요청자(rhkim00)의 프로젝트가 timeistoken 계정에 올라가던 문제의 대응.",
+    "Codex·Claude Code: 설치 여부와 로그인 상태(readiness)를 확인해 설치돼 있으나 미로그인이면 공식 로그인을 열어 주고, 미설치는 설치 링크만 한 줄로 알린다. 결과를 'Signed in: GitHub <계정> · Codex · Claude Code — …' 한 줄로 표시. confirmGithubAccount/checkLocalAiSignIns 단위 테스트, PTY 시나리오·문서·help 갱신."
+  ],
+  "checks": [
+    {
+      "command": "npx tsc; node --import tsx --test tests/*.test.ts (api 제외; requester는 DB 포함 18개); python3 scripts/check_workspace.py; git diff --check; npm run cli:install",
+      "result": "passed",
+      "details": "비-DB 전부 통과, requester DB/PTY(GitHub 계정 확인 단계 포함) 통과, 설치 CLI 갱신."
+    }
+  ],
+  "blockers": [],
+  "next": {
+    "timeistoken": {
+      "task": "TH-038",
+      "action": "실사용: no로 rhkim00 계정 로그인 후 요청 저장소가 그 계정에 생기는지 확인; 리뷰 후 push/PR",
+      "dependsOn": "feat/TH-038-requester-flow"
+    },
+    "rhkim00": {
+      "task": "TH-030",
+      "action": "TH-038 PR 리뷰",
+      "dependsOn": "TH-038 공유"
+    }
+  },
+  "schemaVersion": 1,
+  "author": "timeistoken",
+  "createdAt": "2026-09-29T06:44:20.948691+00:00",
+  "branch": "feat/TH-038-requester-flow",
+  "baseCommit": "9a7ec043372c625b782ad9decc21d146238c7841",
+  "files": [
+    "apps/cli/src/help.ts",
+    "apps/cli/src/wizard.ts",
+    "docs/REQUESTER_QUICKSTART.md",
+    "docs/USER_GUIDE.md",
+    "tests/requester.test.ts",
+    "tests/wizard.test.ts"
+  ]
+}

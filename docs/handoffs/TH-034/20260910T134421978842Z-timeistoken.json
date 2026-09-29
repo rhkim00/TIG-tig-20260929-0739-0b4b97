@@ -1,0 +1,67 @@
+{
+  "task": "TH-034",
+  "status": "REVIEW",
+  "summary": [
+    "CLI 0.4.2: 일반 터미널 PATH에 없는 VS Code/Remote 확장 Codex 자동 탐지. 기존 독립 CLI 우선, metadata/obsolete/OS/CPU/실행 권한 검사 및 최신 숫자 버전 선택.",
+    "관리 CLI 설치와 사용법/양쪽 다음 행동 갱신. 사용자 TIG_test 코드와 저장 세션 변경 및 외부 공개 게시 없음."
+  ],
+  "checks": [
+    {
+      "command": "npm run cli:install; tig --version",
+      "result": "passed",
+      "details": "TypeScript 컴파일 및 0.4.2 패키지 설치 성공. 초기 테스트 helper 타입 오류는 TestContext import로 수정."
+    },
+    {
+      "command": "installed local-ai discovery and codexReadiness with restricted PATH",
+      "result": "passed",
+      "details": "PATH=/usr/local/bin:/usr/bin:/bin에서 실제 Remote 확장 발견 및 CLI 기능/ChatGPT 로그인 확인. 추론 호출 없음."
+    },
+    {
+      "command": "installed CLI tests/executables.test.ts tests/wizard.test.ts tests/requester.test.ts",
+      "result": "passed",
+      "details": "27개 통과. 실제 PTY/HTTP/PG/Git; AI 및 GitHub 경계는 fixture."
+    },
+    {
+      "command": "python3 scripts/check_workspace.py; python3 scripts/check_workflow.py; python3 scripts/check_contracts.py; git diff --check",
+      "result": "passed",
+      "details": "문서/34작업 DAG/정적 계약/whitespace 통과."
+    }
+  ],
+  "blockers": [
+    "실제 구독 추론·외부 GitHub 게시·native OS 실증은 기존 후속 범위. 확장 내부 경로 변경 가능성이 있어 readiness 검사 유지."
+  ],
+  "next": {
+    "timeistoken": {
+      "task": "TH-034",
+      "action": "PR9 CI 확인 후 TIG_test에서 tig 재실행해 저장된 요청의 실제 명세 작성·게시 확인",
+      "dependsOn": "공개 파일/보상은 사용자 최종 확인. main 병합은 유찬 결정."
+    },
+    "rhkim00": {
+      "task": "TH-030",
+      "action": "웹 온보딩의 설치/복구 안내에 VS Code 확장 Codex 자동 탐지 반영",
+      "dependsOn": "최신 PR9 REQUESTER_QUICKSTART.md와 CLI 0.4.2 확인"
+    }
+  },
+  "schemaVersion": 1,
+  "author": "timeistoken",
+  "createdAt": "2026-09-10T13:44:21.975410+00:00",
+  "branch": "feat/TH-034-interactive-requester",
+  "baseCommit": "3c7f55b1dc5af8e062a4075bfc1716b2cdb1b1fb",
+  "files": [
+    ".github/workflows/application.yml",
+    "README.md",
+    "apps/cli/src/executables.ts",
+    "apps/cli/src/local-ai.ts",
+    "apps/cli/src/main.ts",
+    "apps/cli/src/wizard.ts",
+    "docs/REQUESTER_ADVANCED.md",
+    "docs/REQUESTER_QUICKSTART.md",
+    "docs/TRY_TOGETHER.md",
+    "docs/coordination/NOW.md",
+    "docs/coordination/tasks/TH-034.md",
+    "docs/verification/TH-034-interactive-requester.md",
+    "package-lock.json",
+    "package.json",
+    "tests/executables.test.ts"
+  ]
+}

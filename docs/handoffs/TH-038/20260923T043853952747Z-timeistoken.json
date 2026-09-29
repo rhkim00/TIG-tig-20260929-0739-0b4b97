@@ -1,0 +1,70 @@
+{
+  "task": "TH-038",
+  "status": "REVIEW",
+  "summary": [
+    "3단계 요청별 새 저장소: 요청마다 요청자 GitHub 계정 아래 공개 저장소 `<login>/<폴더>-tig-<YYYYMMDD-HHMM>-<id 6자>`를 게시(yes) 시점에 만들고(README 없음) 요청 커밋을 그 main으로 push한 뒤 `POST /v1/projects`로 그 저장소를 project로 등록해 task를 게시한다. 잔액·스냅샷·비밀 게이트 검사를 모두 통과한 뒤에만 저장소를 만들며, 재시도는 plan.json의 repositoryId/projectId를 재사용한다. 고정 전달 저장소 선택(chooseDestination, tig init --repository/--create)은 제거; tig init은 프로젝트 연결만 기록한다.",
+    "공통 계약 변경(유찬 확인 필요): packages/contracts gitRequest.branch가 `main` 또는 `tig/requests/<id>`를 허용, apps/api/request-publication.ts verifyGitRequest가 두 형태를 받는다. 워커(work.ts)는 요청 브랜치를 서버가 주는 gitRequest.branch에서 읽는다(없으면 이전 규칙). request-tree.ts buildRequestTree가 push.git의 ref를 브랜치 이름대로 만든다. 예전 tig가 준비한 plan(repositoryId/projectId 보유)은 그 저장소로 계속 게시된다.",
+    "문서: USER_GUIDE 1-1~1-5, REQUESTER_QUICKSTART 전면, contracts/requester_git.md 규칙 문단, WORKER_QUICKSTART 브랜치 표기, README, 한국어 help·request-instructions 갱신. TH-038 작업 문서 REVIEW."
+  ],
+  "checks": [
+    {
+      "command": "npx tsc --noEmit",
+      "result": "passed",
+      "details": "Node 24.20.0 기준 타입 검사 통과."
+    },
+    {
+      "command": "node --import tsx --test tests/*.test.ts (api.test.ts 제외)",
+      "result": "passed",
+      "details": "320개 중 319 통과. 실패 1건은 TEST_DATABASE_URL이 없는 이 서버의 DB 필요 테스트(요청자 설치 CLI 흐름; 그 테스트의 PTY 시나리오와 fake gh는 새 흐름·요청별 저장소에 맞춰 갱신했으나 실행하지 못함)."
+    },
+    {
+      "command": "python3 scripts/check_workspace.py; python3 scripts/check_workflow.py; python3 scripts/check_contracts.py; git diff --check",
+      "result": "passed",
+      "details": "협업 문서·38개 작업 DAG·정적 상태 계약·whitespace 통과."
+    },
+    {
+      "command": "tests/api.test.ts; npm run test:e2e; 실제 GitHub 저장소 생성·게시·워커 fork 사이클",
+      "result": "not_run",
+      "details": "DB·브라우저·외부 GitHub 없는 환경. 서버 verifyGitRequest의 main 허용은 단위 테스트 없이 코드 변경만(api.test.ts에 케이스 추가 필요). 요청 N건 = 공개 저장소 N개·project 행 N개·워커 fork N개가 되는 운영 영향은 사용자 승인 사항."
+    }
+  ],
+  "blockers": [],
+  "next": {
+    "timeistoken": {
+      "task": "TH-038",
+      "action": "서버 계약 변경(gitRequest.branch main 허용, 요청별 project 행) 리뷰 및 DB 테스트(tests/api.test.ts, requester 설치 CLI) 실행; 실제 GitHub 계정으로 저장소 생성·게시·워커 fork PR 사이클 실검증 후 main 병합 여부 결정",
+      "dependsOn": "feat/TH-038-requester-flow 세 commit"
+    },
+    "rhkim00": {
+      "task": "TH-030",
+      "action": "웹 온보딩·요청 상세 화면을 새 요청자 흐름(폴더 확인, 자연어 조건, 요청별 새 저장소·main 브랜치)에 맞추고 TH-038 PR 리뷰",
+      "dependsOn": "TH-038 리뷰 결과"
+    }
+  },
+  "schemaVersion": 1,
+  "author": "timeistoken",
+  "createdAt": "2026-09-23T04:38:53.945075+00:00",
+  "branch": "feat/TH-038-requester-flow",
+  "baseCommit": "f12f5f1edbe0a0a91801066b554b8906529bb294",
+  "files": [
+    "README.md",
+    "apps/api/src/request-publication.ts",
+    "apps/cli/src/help.ts",
+    "apps/cli/src/main.ts",
+    "apps/cli/src/request-instructions.ts",
+    "apps/cli/src/request-tree.ts",
+    "apps/cli/src/requester.ts",
+    "apps/cli/src/wizard.ts",
+    "apps/cli/src/work.ts",
+    "docs/REQUESTER_QUICKSTART.md",
+    "docs/USER_GUIDE.md",
+    "docs/WORKER_QUICKSTART.md",
+    "docs/contracts/requester_git.md",
+    "docs/coordination/tasks/TH-038.md",
+    "packages/contracts/src/index.ts",
+    "tests/requester-empty.test.ts",
+    "tests/requester.test.ts",
+    "tests/tree-flow.test.ts",
+    "tests/wizard.test.ts"
+  ]
+}

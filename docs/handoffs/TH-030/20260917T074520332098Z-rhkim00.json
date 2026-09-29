@@ -1,0 +1,74 @@
+{
+  "task": "TH-030",
+  "status": "REVIEW",
+  "summary": [
+    "비밀 게이트를 쓸 수 있게 만들었다. 조사에서 전제가 틀렸음이 드러났다 — 이 저장소는 원래부터 발행이 됐고(buildRequestTree 250 files OK), collect()가 커밋 전에 매칭 파일을 걸러내고 있었다. 실제 결함은 더 나빴다: tig가 테스트 파일 14개를 말없이 지우고 5개까지만 보이는 줄에 끼워 언급했다. 수행자는 'npm test 통과'가 불가능한 저장소를 받는다.",
+    "기본값은 그대로 두고(yes는 절대 매칭 파일을 올리지 않는다) 두 가지를 더했다. 무엇이 왜 빠졌는지 패턴 종류까지 화면에 이름으로 나오고, 'include <경로>'로 되넣을 수 있다. 질문을 추가하지 않았다 — 아무것도 안 읽고 yes만 친 사람은 구조적으로 자격증명을 못 올리고, 치르는 대가는 되돌릴 수 있는 약한 인수인계다.",
+    "수행자 쪽은 다른 답이다. 남의 저장소 문자열이 진짜인지 판단할 수 없고 push는 대화형이 아니므로, scanResultCommit이 고정된 요청 커밋을 매칭 경로만으로 다시 훑어 '이미 공개된 것'과 '새로 생긴 것'을 가른다. 새로 생긴 것만 막는다.",
+    "evidence 3라운드: 마법사가 실제로 부르는 latestAiSession 기준으로 살아있는 세션의 목록이 저장소 안 실제 파일 87 → 145개(추적 파일 82 → 138), 심볼릭 링크 중복 35칸 → 0칸. docs/notion/tig-사용안내서.md 같은 한글 파일명이 처음으로 온전히 들어왔다(전에는 'docs/notion/tig-' 토막). SUBAGENT_BYTES를 없애고 스캔 예산 하나로 통합해, 이 프로젝트 세션의 서브에이전트 기록은 전부 읽고 남의 것은 예산에 청구한다.",
+    "evidence 비용: 마법사의 두 호출이 336~428ms → 436~566ms(2.8배 더 읽고 1.7배 더 많은 실제 파일을 싣는다). 남의 프로젝트를 훑는 최악 경우는 2163ms → 37ms. 라운드 2가 얻은 것(512MB 줄 방어, 디렉터리당 git fork 제거, 상한이 맞는 쪽을 남김, 폴더 0개)은 기존 테스트 25개가 수정 없이 통과해 지켜졌다.",
+    "요청 저장소가 기억된 것임을 화면이 밝힌다(chooseDestination.remembered). 폴더별로 저장소를 기억하는 동작은 그대로지만, 예전 실행에서 정해진 이름과 이번에 폴더 이름으로 만든 이름이 화면에서 구별되지 않아 사용자가 잘못 올라간 것으로 읽었다."
+  ],
+  "checks": [
+    {
+      "command": "npx tsc --noEmit",
+      "result": "passed",
+      "details": "exit 0"
+    },
+    {
+      "command": "npm test",
+      "result": "passed",
+      "details": "360/360"
+    },
+    {
+      "command": "실제 발행(요청자, 이 저장소)",
+      "result": "passed",
+      "details": "rhkim00/test-tig-requests 브랜치 tig/requests/237ebeb7…: 252 files, request.md·request.json 루트, 부모 0개, apps/cli/src/* 포함 확인"
+    }
+  ],
+  "blockers": [
+    "비밀 게이트 수행자 쪽에 차단 결함 3건(동일 원인): worker-agent.ts의 통과 규칙이 (경로, 패턴 종류)로만 비교하고 바이트를 보지 않는다. 요청 브랜치가 tests/fixture.py의 가짜 AWS 키를 공개한 상태에서 수행자 AI가 같은 파일을 진짜 키로 덮어쓰면 '이미 공개된 것'으로 통과해 공개 결과 브랜치로 나간다. 배선 전 반드시 수정.",
+    "비밀 게이트 나머지 12건(serious 7 / minor 5)과 evidence 3라운드 잔여는 워크플로 출력에 있다. include 승인이 세션에 남아 다른 요청에 적용되는 것, 폴더 토큰이 화면에 없던 파일까지 승인하는 것 포함.",
+    "자동 검증(settle.ts / result-review.ts)은 배선하지 않았다. docs/verification/automatic-validation-decision.md에 결정과 미결 결함 40건이 있다. 사용자 결정(2026-09-17): 판단 불가 시 48시간 뒤 수행자 지급을 그대로 둔다.",
+    "aicoss195 교차 검증은 이 커밋을 push한 뒤 사용자가 실행"
+  ],
+  "next": {
+    "rhkim00": {
+      "task": "TH-030",
+      "action": "push 후 aicoss195에서 git pull → npm run cli:install → tig work --watch. 이 서버에서 요청 발행 → 수락·실행·제출 → 승인·지급 확인",
+      "dependsOn": "이 커밋 push"
+    },
+    "timeistoken": {
+      "task": "TH-036",
+      "action": "비밀 게이트의 include 설계와 수행자 쪽 통과 규칙, 저장소 통째 발행 규칙 리뷰",
+      "dependsOn": "이 PR 리뷰"
+    }
+  },
+  "schemaVersion": 1,
+  "author": "rhkim00",
+  "branch": "feat/TH-030-web-product",
+  "baseCommit": "527a4eb12cc862a1f0c3f15299a4772715b27d5d",
+  "files": [
+    "apps/cli/src/evidence.ts",
+    "apps/cli/src/local-ai.ts",
+    "apps/cli/src/request-tree.ts",
+    "apps/cli/src/requester.ts",
+    "apps/cli/src/result-review.ts",
+    "apps/cli/src/secret-gate.ts",
+    "apps/cli/src/settle.ts",
+    "apps/cli/src/wizard.ts",
+    "apps/cli/src/worker-agent.ts",
+    "docs/verification/automatic-validation-decision.md",
+    "docs/verification/reviewer-open-defects.md",
+    "docs/verification/settlement-open-defects.md",
+    "tests/evidence.test.ts",
+    "tests/request-tree.test.ts",
+    "tests/requester.test.ts",
+    "tests/result-review.test.ts",
+    "tests/secret-gate.test.ts",
+    "tests/settle.test.ts",
+    "tests/wizard.test.ts",
+    "tests/worker-agent.test.ts"
+  ],
+  "createdAt": "2026-09-17T07:45:20.318147+00:00"
+}

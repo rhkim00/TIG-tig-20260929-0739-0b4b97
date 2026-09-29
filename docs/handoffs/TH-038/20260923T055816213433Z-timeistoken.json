@@ -1,0 +1,35 @@
+{
+  "task": "TH-038",
+  "status": "REVIEW",
+  "summary": [
+    "이전 tig가 세션에 저장한 자동 요청문('AUTO:' 접두)은 요청자가 쓴 말이 아니므로 새 흐름에서 이어가지 않고 다시 묻는다. 설치 CLI(~/.local/bin/tig)를 이 clone의 빌드로 갱신(npm run cli:install)했다."
+  ],
+  "checks": [
+    {
+      "command": "npx tsc --noEmit; node --import tsx --test tests/wizard.test.ts; npm run cli:install; tig help",
+      "result": "passed",
+      "details": "타입 검사·wizard 테스트 통과, 설치본의 tig help가 새 시작 순서를 표시."
+    }
+  ],
+  "blockers": [],
+  "next": {
+    "timeistoken": {
+      "task": "TH-038",
+      "action": "설치된 tig로 실제 흐름 확인 후 리뷰",
+      "dependsOn": "feat/TH-038-requester-flow"
+    },
+    "rhkim00": {
+      "task": "TH-030",
+      "action": "TH-038 PR 리뷰",
+      "dependsOn": "TH-038 공유"
+    }
+  },
+  "schemaVersion": 1,
+  "author": "timeistoken",
+  "createdAt": "2026-09-23T05:58:16.207047+00:00",
+  "branch": "feat/TH-038-requester-flow",
+  "baseCommit": "7d96b38e664241880e446050364768d2bcce05d4",
+  "files": [
+    "apps/cli/src/wizard.ts"
+  ]
+}

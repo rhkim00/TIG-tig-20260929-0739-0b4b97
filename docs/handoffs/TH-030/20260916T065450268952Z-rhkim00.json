@@ -1,0 +1,71 @@
+{
+  "task": "TH-030",
+  "status": "REVIEW",
+  "summary": [
+    "수행자 자동화(유찬 승인): `tig work --market`이 Codex/Claude 사용률(`toolSignals`)을 읽고 맞는 열린 요청 하나를 제안(`recommendTask`), yes 한 번에 수락→실행→결과 브랜치·PR→제출(`marketWork` preset/assumeYes). `tig work --watch --every N` 상주 모드는 여유 신호일 때만 제안, no 뒤 6시간 억제, 작업 오류에도 꺼지지 않고 이어갈 명령(`tig work <id>`)을 한 줄로 안내. AI 실행 제한 20분, 실행 중 5분 heartbeat.",
+    "한도 처리(`limits.ts`): 로컬 AI가 usage/session limit 메시지로 실패하면 reset 시각을 로컬에 기록해 reset까지 제안·초안 도구 선택에서 제외; 수행자 실행 중이면 다른 설치 도구로 대신할지 한 번 묻고, 요청자 초안은 다른 도구로 재시도. 대체 실행 시 모델 매핑(Codex 카탈로그 현재 모델 / Claude `opus`, 요청 effort)을 화면·제출 기록에 명시(P-052).",
+    "요청자 자동 흐름 마무리: 보상 산정(`reward.ts`), 요약 화면 override(숫자/provider·model·effort)를 세션에 저장해 `later` 뒤에도 유지하고 보류 요청의 조건 변경은 저장된 초안으로 AI 호출·도구 확인 없이 재준비; 자동 초안 근거의 숫자를 보상으로 쓰지 않음(P-069); `later` 안내 명령 교정; 프로젝트 세션을 최신 8개 밖에서도 프로젝트 폴더에서 직접 탐색; 세션 텍스트의 비밀 패턴은 `[omitted: looked like a secret]`로 대체.",
+    "문서: USER_GUIDE(요청자 1-1~1-6, 수행자 2-3 자동 제안·실패·대체·한도), WORKER_QUICKSTART, DEVELOPMENT, contracts/day4(자동 초안·수행자 제안·한도 기억·대체 모델), TH-030 진행 기록."
+  ],
+  "checks": [
+    {
+      "command": "npx tsc --noEmit; npm run cli:install; npm test (실제 PostgreSQL)",
+      "result": "passed",
+      "details": "116/116 (신규: limits, reward, worker-auto 테스트; work heartbeat 모의 타이머; wizard override/pending 테스트; requester PTY 확장; evidence 프로젝트 세션·비밀 필터)"
+    },
+    {
+      "command": "실제 실행(dev 서버, rhkim00/test-tig-requests): tig work --market → next → yes → Claude 실행 → PR #3 → AWAITING_REVIEW → tig approve → PAID; Claude 한도 기록 상태에서 --market → Codex 대체 제안 → yes → `Substituting Claude Code opus / medium with Codex gpt-5.6-sol / medium` → PR #4 → tig issue → REFUNDED",
+      "result": "passed",
+      "details": "PR #4는 Codex가 스냅샷에 필요한 파일이 없다며 보고서만 제출(요청 스냅샷 범위 문제, 흐름은 정상). 5분 heartbeat는 두 실행이 1분 내 끝나 실제로는 발화하지 않았고 단위 테스트로 검증"
+    },
+    {
+      "command": "실제 실행(요청자): 샘플 프로젝트 tig → Claude 초안 → 150 TIG 제안 → 120 입력 → AI 재호출 없이 `Reward: 120 TIG — set by you` → later → 파일 수정 후 tig → 보류 검토 → `claude / opus / high` 입력 → 초안만 다시 쓴다고 알린 뒤 보상·수행자 AI 유지",
+      "result": "passed",
+      "details": "리뷰 워크플로(5관점+반박 검증) 확정 12건 수정 후 재검증 통과"
+    }
+  ],
+  "blockers": [
+    "P-053 임계값(80%/30%) 변경·Codex Stop hook·VS Code 패널의 Claude 사용량 소스는 유찬 결정 필요(contracts index.ts는 TH-030 범위 밖)",
+    "고정 주소(ngrok 고정 도메인) 도입 전에는 검증 서버 재시작마다 OAuth callback·APP_ORIGIN·tig connect 재설정 필요"
+  ],
+  "next": {
+    "timeistoken": {
+      "task": "TH-036",
+      "action": "수행자 제안/한도 대체/override 유지 규칙과 문구 리뷰 후 병합; P-053 임계값·Stop hook 결정",
+      "dependsOn": "이 PR 리뷰"
+    },
+    "rhkim00": {
+      "task": "TH-030",
+      "action": "aicoss195에서 git pull 후 새 tig로 --market 교차 검증(요청자: 이 서버, 수행자: aicoss195), ngrok 고정 도메인으로 서버 주소 고정",
+      "dependsOn": "유찬 리뷰"
+    }
+  },
+  "schemaVersion": 1,
+  "author": "rhkim00",
+  "createdAt": "2026-09-16T06:54:50.253900+00:00",
+  "branch": "feat/TH-030-web-product",
+  "baseCommit": "340fc05fdb25ec5c8964c254cb667efc76135359",
+  "files": [
+    "apps/cli/src/evidence.ts",
+    "apps/cli/src/limits.ts",
+    "apps/cli/src/main.ts",
+    "apps/cli/src/requester.ts",
+    "apps/cli/src/reward.ts",
+    "apps/cli/src/wizard.ts",
+    "apps/cli/src/work.ts",
+    "apps/cli/src/worker-auto.ts",
+    "apps/cli/src/worker-code.ts",
+    "docs/DEVELOPMENT.md",
+    "docs/USER_GUIDE.md",
+    "docs/WORKER_QUICKSTART.md",
+    "docs/contracts/day4.md",
+    "docs/coordination/tasks/TH-030.md",
+    "tests/evidence.test.ts",
+    "tests/limits.test.ts",
+    "tests/requester.test.ts",
+    "tests/reward.test.ts",
+    "tests/wizard.test.ts",
+    "tests/work.test.ts",
+    "tests/worker-auto.test.ts"
+  ]
+}

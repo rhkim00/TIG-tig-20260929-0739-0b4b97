@@ -1,0 +1,51 @@
+{
+  "task": "TH-030",
+  "status": "REVIEW",
+  "summary": [
+    "프로젝트 밖(홈·/data 등)에서 tig를 실행하면 폴더를 묻지 않고 tig가 고른다: 7일 내 최신 Claude Code 세션의 프로젝트(ai-notes) → 마지막 tig 프로젝트(lastRoot) 순, 존재하는 Git 저장소만. 화면에 근거를 표시하고 다른 프로젝트는 그 폴더 안에서 실행하라고 안내. 둘 다 없거나 tig setup일 때만 질문",
+    "recentProject(evidence.ts) 단위 테스트, 사용 안내·계약 갱신"
+  ],
+  "checks": [
+    {
+      "command": "npx tsc --noEmit; node --test tests/evidence.test.ts tests/wizard.test.ts tests/requester.test.ts",
+      "result": "passed",
+      "details": "26/26 (전체 96/96은 직전 commit에서 통과, 이번 변경은 위 세 파일 범위)"
+    },
+    {
+      "command": "실제 실행: /data에서 tig → 'Project: … (your latest Claude Code session)' 또는 '(your last tig project)' 표시 후 바로 작업 설명 질문",
+      "result": "passed",
+      "details": "폴더 질문 없음 확인"
+    },
+    {
+      "command": "git diff --check; python3 scripts/check_workspace.py",
+      "result": "passed",
+      "details": "공백·문서 링크 통과"
+    }
+  ],
+  "blockers": [],
+  "next": {
+    "timeistoken": {
+      "task": "TH-036",
+      "action": "자동 프로젝트 선택 규칙(최신 Claude 세션 우선) 리뷰 후 병합",
+      "dependsOn": "이 PR 리뷰"
+    },
+    "rhkim00": {
+      "task": "TH-030",
+      "action": "Codex Stop hook, 웹 온보딩 안내",
+      "dependsOn": "유찬 리뷰"
+    }
+  },
+  "schemaVersion": 1,
+  "author": "rhkim00",
+  "createdAt": "2026-09-14T01:52:49.528207+00:00",
+  "branch": "feat/TH-030-web-product",
+  "baseCommit": "6d808b2042ae39207a48713d080a1cdab452bf5e",
+  "files": [
+    "apps/cli/src/evidence.ts",
+    "apps/cli/src/wizard.ts",
+    "docs/USER_GUIDE.md",
+    "docs/contracts/day4.md",
+    "docs/coordination/tasks/TH-030.md",
+    "tests/evidence.test.ts"
+  ]
+}

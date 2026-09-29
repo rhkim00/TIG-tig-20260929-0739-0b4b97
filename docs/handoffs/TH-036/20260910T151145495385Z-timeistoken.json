@@ -1,0 +1,56 @@
+{
+  "task": "TH-036",
+  "status": "REVIEW",
+  "summary": [
+    "사용자 요청으로 PR8→9→10을 main에 순차 병합; source CI 성공과 병합 tree 동일 확인",
+    "현재 main CLI0.5.0 기준 시작 문서·NOW·양쪽 다음 행동 및 병합 SHA 기록 갱신; 상호 리뷰 미기록 상태 유지"
+  ],
+  "checks": [
+    {
+      "command": "gh pr view 8/9/10; git merge-tree; git diff origin/main b48d7b3",
+      "result": "passed",
+      "details": "각 source Application/Handoff/Workspace 성공, 단계별 tree 일치, PR10 병합 main과 source diff 없음"
+    },
+    {
+      "command": "python3 scripts/check_workspace.py; python3 scripts/check_workflow.py; python3 scripts/check_contracts.py; git diff --check",
+      "result": "passed",
+      "details": "협업 문서·36개 작업 의존성·상태 계약·공백 검사 통과"
+    },
+    {
+      "command": "Final documentation PR and main CI",
+      "result": "not_run",
+      "details": "이 commit push 후 GitHub Actions에서 해당 SHA 검사 결과 확인"
+    }
+  ],
+  "blockers": [],
+  "next": {
+    "timeistoken": {
+      "task": "TH-036",
+      "action": "문서 PR 및 최종 main CI 확인. 이후 본인 요청 tig work 실제 생성 확인과 격리/필수 검사 연결",
+      "dependsOn": "PR8~10 main 병합 완료; 일반 거래는 별도 격리 검증 필요"
+    },
+    "rhkim00": {
+      "task": "TH-030",
+      "action": "본인 브랜치에 최신 main 반영 후 설치·연결·개인 수행 결과·실패 복구 웹 온보딩",
+      "dependsOn": "main CLI0.5.0 및 최신 요청자/수행자 사용법"
+    }
+  },
+  "schemaVersion": 1,
+  "author": "timeistoken",
+  "createdAt": "2026-09-10T15:11:45.490503+00:00",
+  "branch": "docs/TH-036-main-integration",
+  "baseCommit": "856687ca6d51fc4ffaef62880759bbfa11bc8e52",
+  "files": [
+    "README.md",
+    "START_HERE.md",
+    "docs/COLLABORATION.md",
+    "docs/coordination/BOARD.md",
+    "docs/coordination/NOW.md",
+    "docs/coordination/assignments.json",
+    "docs/coordination/tasks/TH-033.md",
+    "docs/coordination/tasks/TH-034.md",
+    "docs/coordination/tasks/TH-035.md",
+    "docs/coordination/tasks/TH-036.md",
+    "docs/verification/TH-036-main-integration.md"
+  ]
+}

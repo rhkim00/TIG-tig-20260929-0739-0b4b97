@@ -1,0 +1,6 @@
+node_modules
+build
+.local
+apps/web/dist
+package-lock.json
+test-results

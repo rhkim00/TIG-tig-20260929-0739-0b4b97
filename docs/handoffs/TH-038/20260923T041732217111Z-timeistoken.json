@@ -1,0 +1,70 @@
+{
+  "task": "TH-038",
+  "status": "IN_PROGRESS",
+  "summary": [
+    "1단계 요청자 흐름: tig가 후보 폴더를 보여 주고 'Is this the folder to hand off?'로 확인한다(Enter=yes, no면 경로 또는 알려진 프로젝트 이름으로 입력). 작업 내용·수행자 도구·모델·추론 수준·TIG를 한 문장에서 읽고(request-terms.ts) 빠진 항목만 하나씩 묻는다. 완료 기준은 요청자가 쓴다(Enter=요청 문장).",
+    "AI 초안 제거: 로컬 AI 초안 호출, 파일 선택/컨텍스트 narrowing, --select-files, recommend.ts(모델 추천), reward.ts(보상 산정) 삭제. request.md는 답변과 프로젝트 사실(request-facts.ts: 브랜치·변경 수·최근 커밋·package.json/requirements 등에서 감지한 설치·테스트 명령)로만 작성. 리뷰 화면의 no는 지시를 요청 내용에 덧붙여 다시 준비(AI 없음). usageAvoids는 local-ai-usage.ts로 이동(결과 검토가 사용).",
+    "한국어 도움말 갱신, TH-038 작업 문서·배정·보드·NOW 등록. 2단계(파일 범위)·3단계(요청별 새 저장소)는 후속 commit."
+  ],
+  "checks": [
+    {
+      "command": "npx tsc --noEmit",
+      "result": "passed",
+      "details": "Node 24.20.0(.local/runtime, gitignore) 기준 타입 검사 통과."
+    },
+    {
+      "command": "node --import tsx --test tests/*.test.ts (api.test.ts 제외)",
+      "result": "passed",
+      "details": "324개 중 323 통과. 실패 1건은 TEST_DATABASE_URL이 없는 이 서버에서 DB가 필요한 requester 설치 CLI 테스트(변경 전 기준선과 동일). 신규 tests/request-terms.test.ts·request-facts.test.ts, 재작성한 tests/wizard.test.ts 포함."
+    },
+    {
+      "command": "python3 scripts/check_workspace.py; python3 scripts/check_workflow.py; python3 scripts/check_contracts.py; git diff --check",
+      "result": "passed",
+      "details": "38개 작업 DAG·협업 문서·정적 상태 계약·whitespace 통과."
+    },
+    {
+      "command": "tests/api.test.ts; npm run test:e2e; 실제 GitHub 게시",
+      "result": "not_run",
+      "details": "DB·브라우저·외부 GitHub 없는 환경. 1단계는 CLI 대화 흐름만 바꾸며 서버 계약은 변경하지 않았다."
+    }
+  ],
+  "blockers": [],
+  "next": {
+    "timeistoken": {
+      "task": "TH-038",
+      "action": "2단계 request-tree.ts 미추적 파일 규칙 제거(protected/secret gate 유지), 3단계 요청별 새 저장소(requester.ts publish 시 생성, apps/api project 행 요청별 생성). 이후 USER_GUIDE/REQUESTER_QUICKSTART 갱신",
+      "dependsOn": "이 commit의 1단계 흐름"
+    },
+    "rhkim00": {
+      "task": "TH-030",
+      "action": "요청자 흐름 변경(폴더 확인·자연어 조건·AI 초안 제거)이 웹 온보딩 문구와 맞는지 확인; TH-038 PR 리뷰",
+      "dependsOn": "feat/TH-038-requester-flow 공유"
+    }
+  },
+  "schemaVersion": 1,
+  "author": "timeistoken",
+  "createdAt": "2026-09-23T04:17:32.212053+00:00",
+  "branch": "feat/TH-038-requester-flow",
+  "baseCommit": "457f5cb8fc26cc4d784ba8e6ff916f8682210ccd",
+  "files": [
+    ".gitignore",
+    "apps/cli/src/help.ts",
+    "apps/cli/src/local-ai-usage.ts",
+    "apps/cli/src/main.ts",
+    "apps/cli/src/recommend.ts",
+    "apps/cli/src/request-facts.ts",
+    "apps/cli/src/request-terms.ts",
+    "apps/cli/src/result-review.ts",
+    "apps/cli/src/reward.ts",
+    "apps/cli/src/wizard.ts",
+    "docs/coordination/BOARD.md",
+    "docs/coordination/NOW.md",
+    "docs/coordination/assignments.json",
+    "docs/coordination/tasks/TH-038.md",
+    "tests/evidence.test.ts",
+    "tests/request-facts.test.ts",
+    "tests/request-terms.test.ts",
+    "tests/reward.test.ts",
+    "tests/wizard.test.ts"
+  ]
+}

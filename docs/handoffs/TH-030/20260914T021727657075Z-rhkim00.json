@@ -1,0 +1,59 @@
+{
+  "task": "TH-030",
+  "status": "REVIEW",
+  "summary": [
+    "사용자 목표(2026-09-14, 유찬 승인 범위): 토큰이 떨어진 사용자가 tig만 치면 repo·막힌 작업·수행자 AI까지 자동. 로컬 AI 세션 기록을 직접 읽는다: Claude Code <config>/projects/<key>/*.jsonl(하위 폴더 키 포함, sidechain 제외, 앞 64KB ai-title·뒤 512KB), Codex <CODEX_HOME>/sessions/**/rollout-*.jsonl(session_meta.cwd 일치). 마지막 요청·마지막 답변·한도 도달(limitHit)을 추출, 3000자 제한, 편집기 삽입 태그·pasted-file 헤더 제거. hook(claude-notes)은 보조 수단으로 유지",
+    "tig 흐름: 작업 설명을 묻기 전에 증거(커밋·변경·세션)를 먼저 보여주고 Enter 한 번이면 자동 초안(별도 확인 질문 제거). 세션·메모가 있으면 이전 요청의 checkpoint 요약은 숨김(그 외 400자). 세션 내용은 autoNote로 로컬 AI에만 전달, 공개 originalRequest는 AUTO:+커밋/경로. draftPrompt에 세션·한도 문맥 추가",
+    "초안 도구 자동 선택(usageAvoids): 둘 다 설치 시 세션 limitHit provider, Codex rateLimits 관측 low, 6h 내 Claude 상태줄 관측 low를 제외하고 남은 하나를 근거와 함께 선택; 0/2개면 기존 질문. 수행자 AI: 한 줄 제안 'Worker AI: provider / model / effort — 근거'(provider=세션 도구→초안 도구, Codex 카탈로그 불가 시 다음 후보) + Enter 확정, parseWorkerAi로 입력 검증. 프로젝트 밖 실행 시 latestSessionRoot(최신 transcript cwd)→ai-notes→lastRoot",
+    "문서: USER_GUIDE(증거 화면 예시·자동 흐름·1-4/1-5 갱신), DEVELOPMENT, day4 계약(읽기 범위·규칙 명시), TH-030 기록"
+  ],
+  "checks": [
+    {
+      "command": "npx tsc --noEmit; npm test (실제 PostgreSQL)",
+      "result": "passed",
+      "details": "100/100: Claude transcript 파싱(제목·마지막 요청·답변·한도·하위 폴더·7일)/Codex rollout(cwd 일치·pasted 헤더 제거)/latestAiSession·recentProject(transcript 기반)/세션→clarification 및 요약 숨김/한 줄 수행자 AI 제안·override·parseWorkerAi 추가, requester PTY·wizard 기존 테스트 유지"
+    },
+    {
+      "command": "실제 실행: 샘플 프로젝트 + Codex 한도 도달 세션 fixture(CODEX_HOME) → tig → Enter → 'Local AI for drafting: Claude Code — your last Codex session hit its usage limit' → Claude 초안 → 'Worker AI … [claude / opus / medium]' Enter → 준비(게시 보류)",
+      "result": "passed",
+      "details": "초안 제목 'Finish calc.py div() zero-divisor handling (return None) and add pytest tests for sub() and div()' — 세션의 막힌 지점을 그대로 반영. /data에서 실행 시 폴더 질문 없이 프로젝트 선택"
+    },
+    {
+      "command": "python3 scripts/check_workspace.py; git diff --check",
+      "result": "passed",
+      "details": "문서 링크·공백 통과"
+    }
+  ],
+  "blockers": [
+    "세션 기록 형식(Claude Code jsonl 필드, Codex rollout event_msg)은 공식 계약이 아니라 관측 기반 — 버전 변경 시 깨질 수 있어 실패 시 조용히 '세션 없음'으로 처리. DRAFT-03(설치/연동 방식)로 유찬 확인 필요",
+    "세션 원문을 로컬 AI 초안 호출에 전달하는 범위(마지막 요청·답변 각 3000자)의 정책 확인(P-021 로컬 보존·게시 시 필요한 내용만 전송)",
+    "보상 TIG는 여전히 사용자 입력(P-022). 자동 제안 여부는 유찬 결정"
+  ],
+  "next": {
+    "timeistoken": {
+      "task": "TH-036",
+      "action": "세션 기록 읽기 범위·초안 도구 자동 선택·한 줄 수행자 AI 제안 리뷰(DRAFT-03/P-021/P-052 관점) 후 병합",
+      "dependsOn": "이 PR 리뷰"
+    },
+    "rhkim00": {
+      "task": "TH-030",
+      "action": "실제 사용자 세션에서 tig → Enter 검증 반복, 웹 온보딩 안내 반영",
+      "dependsOn": "유찬 리뷰"
+    }
+  },
+  "schemaVersion": 1,
+  "author": "rhkim00",
+  "createdAt": "2026-09-14T02:17:27.641898+00:00",
+  "branch": "feat/TH-030-web-product",
+  "baseCommit": "5bc465c181625b3a4da9f86b3e3e3e051817c824",
+  "files": [
+    "apps/cli/src/evidence.ts",
+    "apps/cli/src/local-ai.ts",
+    "apps/cli/src/wizard.ts",
+    "docs/DEVELOPMENT.md",
+    "docs/USER_GUIDE.md",
+    "docs/contracts/day4.md",
+    "docs/coordination/tasks/TH-030.md",
+    "tests/evidence.test.ts"
+  ]
+}

@@ -1,0 +1,85 @@
+{
+  "task": "TH-030",
+  "status": "REVIEW",
+  "summary": [
+    "빈 프로젝트 요청 허용(P-036): 마법사·CLI·서버 가드 완화, documents-only Git 요청 게시 허용",
+    "Claude Code 초안/수행 어댑터 추가, 사용자가 Codex/Claude Code를 매번 명시 선택(기본값·기억 없음), 요청 프롬프트 기본값 제거·resume 명시",
+    "수행자 사이클 구현: tig work --market/<id> 수락→로컬 AI→report.md 포함 결과 커밋→tig/results/<id> 브랜치(직접/fork)·PR→플랫폼 제출(gitResult 서버 확인)→요청자 승인/환불/48h; 웹 검사 결과·PR 링크 렌더",
+    "tig init --create가 README 있는 main으로 저장소 생성(첫 요청 브랜치가 기본 브랜치가 되지 않도록)"
+  ],
+  "checks": [
+    {
+      "command": "npx tsc --noEmit",
+      "result": "passed",
+      "details": "타입 검사 통과"
+    },
+    {
+      "command": "node --test tests/*.test.ts (실제 PostgreSQL)",
+      "result": "passed",
+      "details": "80/80: API local-trial 사이클(422 경로 거부→제출→승인 1회 지급 700→재승인 409), CLI 마켓 흐름 호출 순서·제출 body·Claude 선택, Claude 어댑터 단위, 빈 프로젝트 prepare"
+    },
+    {
+      "command": "python3 scripts/check_workspace.py; git diff --check",
+      "result": "passed",
+      "details": "문서 링크·공백 통과"
+    },
+    {
+      "command": "실제 실행: tig(요청자) → tig work(수행자, Claude Code) → GitHub PR#1 → tig approve",
+      "result": "passed",
+      "details": "같은 서버·같은 GitHub 계정(직접 push 경로)에서 50 TIG 요청 1사이클 PAID, PR 브랜치 pytest 56 passed. 타 계정 fork 경로는 스텁 테스트만"
+    },
+    {
+      "command": "타 머신·타 GitHub 계정 fork 경로, 웹 E2E",
+      "result": "not_run",
+      "details": "두 번째 머신에서 실검증 예정; 이 push가 그 전제"
+    }
+  ],
+  "blockers": [
+    "런타임 테스트는 TIG가 실행하지 않음(not_run 명시) — 격리 실행은 유찬 영역",
+    "PR 병합/Apply는 요청자 수동(P-026); fork 경로 실검증 필요"
+  ],
+  "next": {
+    "timeistoken": {
+      "task": "TH-036",
+      "action": "이 브랜치 리뷰: 서버 claim/submit 가드 완화(local trial)·gitResult 검증 범위·계약 문구 확인 후 병합 여부 결정; 격리 실행 검증 이어가기",
+      "dependsOn": "이 PR 리뷰"
+    },
+    "rhkim00": {
+      "task": "TH-030",
+      "action": "두 번째 머신(타 GitHub 계정)에서 tig work --market fork 경로 실검증 후 결과를 handoff에 기록; 이어서 웹 온보딩·설치·실패 복구 화면",
+      "dependsOn": "이 브랜치 push 및 상대 머신 준비"
+    }
+  },
+  "schemaVersion": 1,
+  "author": "rhkim00",
+  "createdAt": "2026-09-13T09:01:57.224279+00:00",
+  "branch": "feat/TH-030-web-product",
+  "baseCommit": "5e32d642e44d9cfc484b88b0aa2e41cd3c859020",
+  "files": [
+    "apps/api/src/app.ts",
+    "apps/api/src/lifecycle.ts",
+    "apps/api/src/request-publication.ts",
+    "apps/cli/src/executables.ts",
+    "apps/cli/src/local-ai.ts",
+    "apps/cli/src/main.ts",
+    "apps/cli/src/requester.ts",
+    "apps/cli/src/terminal.ts",
+    "apps/cli/src/wizard.ts",
+    "apps/cli/src/work.ts",
+    "apps/cli/src/worker-code.ts",
+    "apps/cli/src/worker-git.ts",
+    "apps/web/src/TaskTransaction.tsx",
+    "docs/REQUESTER_QUICKSTART.md",
+    "docs/WORKER_QUICKSTART.md",
+    "docs/contracts/lifecycle.md",
+    "docs/contracts/requester_git.md",
+    "docs/coordination/assignments.json",
+    "docs/coordination/tasks/TH-030.md",
+    "packages/contracts/src/lifecycle.ts",
+    "tests/api.test.ts",
+    "tests/local-ai-claude.test.ts",
+    "tests/requester-empty.test.ts",
+    "tests/requester.test.ts",
+    "tests/work.test.ts"
+  ]
+}

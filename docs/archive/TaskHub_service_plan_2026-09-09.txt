@@ -1,0 +1,1527 @@
+TaskHub 서비스 기획서
+AI 구독 기반 P2P 작업 교환 플랫폼
+
+작성 기준: 2026-09-09
+문서 목적:
+- 다른 GPT 대화 세션에 그대로 전달
+- MVP 개발 기준 문서
+- 사업성/특허/법적 검토용 기준 문서
+- 공동기획 및 서비스 설계 기준 문서
+
+
+==================================================
+1. 서비스 한 줄 정의
+==================================================
+
+TaskHub는 사용자가 자신이 보유한 AI 구독/도구를 활용해 다른 사람의 작업을 수행하고 Work Credit을 얻으며, 이후 자신이 필요할 때 다른 사용자의 AI-assisted work를 요청할 수 있는 P2P AI 작업 교환 플랫폼이다.
+
+핵심 개념:
+
+"내 AI가 남을 때 남의 일을 해주고,
+내가 필요할 때 다른 사람의 AI에게 일을 맡긴다."
+
+영문 요약:
+
+TaskHub lets your AI work for someone else when you don't need it — so someone else's AI can work for you when you do.
+
+
+==================================================
+2. 서비스가 해결하려는 문제
+==================================================
+
+Claude Max, ChatGPT Pro, Cursor 등 고가 AI 구독자는 자신의 사용량을 항상 전부 소비하지 않는다.
+
+사용하지 않은 AI 사용량은 일정 시간이 지나면 사실상 소멸하며,
+그 시점 이후 사용자의 잔여 capacity 가치는 0이 된다.
+
+반대로 어떤 사용자는 특정 시점에만 고성능 AI 작업이 필요하지만,
+이를 위해 매달 비싼 구독을 새로 결제하고 싶지는 않을 수 있다.
+
+TaskHub는 이 두 사용자를 연결한다.
+
+남는 AI 사용 능력
+        ↓
+다른 사람의 실제 Task 수행
+        ↓
+검증된 결과물 생성
+        ↓
+Work Credit 획득
+        ↓
+나중에 자신의 Task 요청
+
+즉:
+
+Unused AI Capacity Today
+→ Verified Work
+→ Work Credit
+→ AI Work Tomorrow
+
+라는 경제를 만드는 것이 핵심이다.
+
+
+==================================================
+3. 무엇을 거래하는 서비스인가
+==================================================
+
+TaskHub는 AI token, account credential, 구독권 자체를 직접 거래하지 않는다.
+
+TaskHub에서 거래되는 대상은:
+
+"Verified AI-Assisted Work"
+
+이다.
+
+초기에는 Coding Task에 집중한다.
+
+예시:
+
+- Bug fix
+- Feature implementation
+- Unit test 작성
+- Refactoring
+- PyTorch debugging
+- CUDA optimization
+- Dependency migration
+- API 구현
+- Documentation
+
+장기적으로는 다음 영역까지 확장 가능하다.
+
+- Research
+- Document
+- Data analysis
+- Image
+- Video
+- 3D
+- CAD
+- Simulation
+
+MVP에서는 Coding Task Only로 제한한다.
+
+
+==================================================
+4. 핵심 UX 철학
+==================================================
+
+TaskHub는 사용자가 복잡한 GitHub/Git 작업이나 프롬프트 엔지니어링을 직접 수행하게 만들면 안 된다.
+
+사용자가 느껴야 하는 개념은 최대한 다음 네 가지뿐이다.
+
+Task
+Work
+Result
+Reward
+
+이를 위해 세 가지 UX 원칙을 둔다.
+
+
+4.1 No Git UX
+
+사용자는 가능하면 다음을 의식하지 않는다.
+
+- git clone
+- branch
+- checkout
+- git add
+- commit
+- push
+- pull request
+
+TaskHub가 이를 백그라운드에서 자동 처리한다.
+
+
+4.2 No Prompt Engineering
+
+Requester는 완성도 높은 프롬프트를 직접 작성할 필요가 없다.
+
+예:
+
+"이 프로젝트 로그인하면 자꾸 세션이 풀려.
+원인 찾아서 고쳐줘."
+
+정도로 입력하면,
+Requester 측 AI가 repository를 분석하고 TaskSpec을 자동 생성한다.
+
+
+4.3 No Model Expertise
+
+일반 사용자는 어떤 AI 모델이 적합한지 알 필요가 없다.
+
+기본값은:
+
+AI Requirement
+
+- Recommended
+- Choose manually
+
+중 Recommended를 기본으로 한다.
+
+Requester AI 또는 TaskHub가 작업을 분석해
+필요한 AI capability를 추천한다.
+
+고급 사용자만 특정 모델/추론 강도를 직접 지정한다.
+
+
+==================================================
+5. 전체 서비스 구조
+==================================================
+
+REQUESTER
+    │
+Requester AI
+    │
+문제 이해
+Repository 분석
+TaskSpec 생성
+완료 조건 생성
+모델 조건 추천
+    │
+    ▼
+
+TASKHUB
+
+- Task Marketplace
+- Worker Matching
+- Verification
+- Work Credits
+- Reputation
+- Execution Proof
+
+    │
+    ▼
+
+Worker AI
+    │
+Repository 수정
+테스트
+결과 생성
+    │
+WORKER
+
+
+핵심 구조는:
+
+AI ↔ Marketplace ↔ AI
+
+이다.
+
+사람은 양쪽에서 supervisor 역할을 한다.
+
+
+==================================================
+6. Requester UX
+==================================================
+
+Requester의 행동은 최대한 네 단계로 줄인다.
+
+1. Repository 선택
+2. 자연어로 원하는 작업 설명
+3. 자신의 AI가 생성한 Task 확인
+4. Post
+
+
+예시:
+
+Repository:
+yuchan/3dgs-project
+
+요청:
+"training을 오래 돌리면 VRAM이 계속 증가해.
+원인 찾아서 수정해줘."
+
+[AI로 작업 만들기]
+
+
+Requester 측 AI가 repository를 분석하고 자동으로 다음을 만든다.
+
+Task:
+Fix continuous VRAM growth
+
+Likely relevant files:
+- train.py
+- trainer.py
+- memory_utils.py
+
+Requirements:
+- 기존 public API 유지
+- 기존 tests 통과
+- memory leak 제거
+
+Validation:
+- build pass
+- tests pass
+
+Recommended AI:
+- S-tier coding model
+- High reasoning
+
+Reward:
+350 WC
+
+
+Requester는 결과를 확인한 뒤:
+
+[수정]
+[Post]
+
+중 하나만 누르면 된다.
+
+
+==================================================
+7. AI Requirement
+==================================================
+
+Requester가 AI 조건을 지정할 수 있다.
+
+기본값:
+
+AI Requirement
+
+● Recommended
+○ Choose manually
+
+
+Recommended를 선택하면 TaskHub/Requester AI가 다음처럼 조건을 만든다.
+
+예:
+
+Coding capability >= S
+Reasoning >= High
+Context >= 100k
+
+
+고급 사용자는 직접 지정할 수 있다.
+
+예:
+
+Provider: OpenAI
+Model: 특정 모델
+Reasoning: High+
+Verification: Verified only
+
+
+즉 지원 방식은 두 가지다.
+
+1. 특정 모델 지정
+2. Capability 기반 지정
+
+
+==================================================
+8. Worker Matching
+==================================================
+
+Worker는 자신이 사용 가능한 AI 도구를 프로필에 등록한다.
+
+예:
+
+My AI Tools
+
+- Claude Max
+- ChatGPT Pro
+- Cursor
+- Gemini
+- Local Qwen
+- Local GPU
+
+
+각 AI capability는 검증 수준을 가진다.
+
+예:
+
+Claude Max
+Verification: Attested
+
+GPT 계열
+Verification: Client Verified
+
+Local model
+Verification: Client Verified
+
+
+TaskHub는 Task의 AI requirement와
+Worker capability를 비교한다.
+
+조건을 만족하는 Worker에게만 해당 Task를 보여준다.
+
+
+예:
+
+Available Task
+
+Fix CUDA memory leak
+Reward: 350 WC
+
+Required:
+S-tier coding model
+High reasoning
+
+✓ Your AI is eligible
+
+[Accept & Work]
+
+
+==================================================
+9. Worker UX
+==================================================
+
+Worker도 가능한 한 네 단계만 경험한다.
+
+1. Task 선택
+2. Accept
+3. 자기 AI로 작업
+4. Submit
+
+
+Worker가 Accept를 누르면 TaskHub Worker가 자동으로 다음을 수행한다.
+
+- Repository 준비
+- 작업용 branch 생성
+- Workspace 생성
+- Task context 준비
+- 관련 파일 준비
+- Requester 원본 요구사항 포함
+- AI용 TaskSpec 생성
+- Base commit 기록
+
+
+Worker는:
+
+[Open Workspace]
+
+만 누르면 된다.
+
+
+==================================================
+10. TaskHub Worker
+==================================================
+
+초기에는 TaskHub Worker를
+CLI 또는 작은 Desktop Helper 형태로 제공한다.
+
+장기적으로는 Desktop App이 이상적이다.
+
+
+이상적인 Worker UX:
+
+[Accept]
+   ↓
+[Open Workspace]
+   ↓
+자기 AI로 작업
+   ↓
+[Submit]
+
+
+Git 관련 동작은 TaskHub가 자동 처리한다.
+
+
+==================================================
+11. AI에게 전달되는 Task Package
+==================================================
+
+Worker가 다시 프롬프트를 작성할 필요가 없다.
+
+TaskHub가 자동으로 AI용 task package를 만든다.
+
+
+예:
+
+TASK #582
+
+Goal:
+Fix continuous VRAM growth.
+
+Original requester request:
+"training을 오래 돌리면 VRAM이 계속 증가해..."
+
+Repository:
+...
+
+Relevant context:
+...
+
+Constraints:
+- Preserve public API
+- Existing tests must pass
+
+Acceptance criteria:
+- Build pass
+- Tests pass
+- VRAM growth issue resolved
+
+
+Worker는 이 Task Package를 자신의 AI tool에 전달해 작업한다.
+
+
+==================================================
+12. Submit UX
+==================================================
+
+AI 작업이 끝나면 TaskHub Worker가 변경사항을 감지한다.
+
+예:
+
+Task appears complete
+
+7 files changed
+142 tests passed
+
+[Review]
+[Submit]
+
+
+Submit을 누르면 TaskHub가 뒤에서 자동 처리한다.
+
+- git add
+- commit
+- push
+- PR 생성
+- CI 실행
+- Execution Receipt 생성
+- Submission 등록
+
+
+Worker는 Git 명령어를 거의 직접 다루지 않는다.
+
+
+==================================================
+13. Execution Proof
+==================================================
+
+TaskHub의 핵심 차별 기능이다.
+
+Requester가 특정 AI/model/reasoning level을 요구했는데
+Worker가 실제로 다른 모델을 사용하면 시장 신뢰가 무너진다.
+
+따라서 결과물뿐 아니라
+"어떻게 작업이 수행되었는지"도 기록하고 검증한다.
+
+
+Execution Receipt 예:
+
+Task #582
+
+Worker:
+cho-dev
+
+Input:
+- Prompt matched
+- Base commit matched
+
+Execution:
+- Provider: OpenAI / Anthropic / etc.
+- Model: requested model
+- Reasoning: requested level
+
+Output:
+- Commit SHA
+- Files changed
+
+Validation:
+- Build passed
+- Tests passed
+
+
+==================================================
+14. Execution Verification 등급
+==================================================
+
+모든 AI 실행을 같은 수준으로 검증할 수는 없다.
+
+따라서 3단계로 나눈다.
+
+
+1. Verified
+
+Provider/API 등 신뢰 가능한 metadata를 통해
+실제 모델/실행 정보를 검증할 수 있는 경우.
+
+
+2. Client Verified
+
+TaskHub Worker가 로컬 execution metadata를 확인한 경우.
+
+
+3. Attested
+
+Worker가 자신이 사용한 AI/model을 직접 선언한 경우.
+
+
+Requester는 Task 생성 시 다음과 같이 선택할 수 있다.
+
+Verification requirement:
+
+- Verified only
+- Client Verified+
+- Attested allowed
+
+
+==================================================
+15. Prompt Verification
+==================================================
+
+Requester가 원본 prompt를 그대로 실행해달라고 요구하는 경우를 지원한다.
+
+Task 생성 시:
+
+prompt_hash
+
+를 생성한다.
+
+Execution 시:
+
+executed_prompt_hash
+
+를 비교한다.
+
+또한 repository는:
+
+base_commit_sha
+
+를 기록한다.
+
+이를 통해:
+
+- 어떤 prompt가 사용되었는지
+- 어떤 repository 상태에서 시작했는지
+- 어떤 결과 commit이 생성되었는지
+
+를 연결할 수 있다.
+
+
+==================================================
+16. 결과 검증
+==================================================
+
+Execution Proof와 Result Verification은 별도다.
+
+V1에서는 단순하게 시작한다.
+
+- Build pass
+- Existing tests pass
+- Requester approve
+
+
+향후 추가 가능:
+
+- Unit test
+- Benchmark
+- Lint
+- Static analysis
+- Security scan
+- AI code review
+- Custom evaluator
+- Performance regression check
+
+
+==================================================
+17. Requester 결과 승인 UX
+==================================================
+
+Requester가 전체 diff를 일일이 분석하지 않아도 되도록
+Requester AI가 결과를 요약한다.
+
+
+예:
+
+Task completed
+
+What changed:
+- train.py에서 graph reference 누적 제거
+- tensor detach 위치 수정
+- regression test 2개 추가
+
+Verification:
+✓ Build
+✓ Tests
+✓ Requested AI execution
+
+Expected impact:
+Peak VRAM stabilized
+
+[View Details]
+
+[Approve]
+[Request Changes]
+
+
+즉 Requester AI가 결과 검토를 보조한다.
+
+
+==================================================
+18. Request Changes
+==================================================
+
+Requester는 단순 Reject보다
+Request Changes를 통해 수정사항을 요청할 수 있다.
+
+예:
+
+"VRAM은 줄었는데 validation loss가 증가했습니다.
+이 부분 다시 확인해주세요."
+
+
+Task는 동일 Worker에게 revision 상태로 돌아간다.
+
+이 동안 Work Credit은 escrow에 유지된다.
+
+수정 횟수 제한은 향후 확정 필요.
+
+
+==================================================
+19. Work Credit Economy
+==================================================
+
+초기에는 현금과 완전히 분리한다.
+
+Work Credit은:
+
+- 현금 구매 불가
+- 현금 출금 불가
+- 사용자 간 직접 송금 불가
+
+오직:
+
+Task 수행 → 획득
+Task 요청 → 소비
+
+용도로만 사용한다.
+
+
+예:
+
+Requester가 350 WC Task를 생성
+
+Requester
+   ↓
+350 WC
+   ↓
+Task Escrow
+   ↓
+작업 성공
+   ↓
+Worker +350 WC
+
+
+작업 실패/취소 시
+Requester에게 반환한다.
+
+
+==================================================
+20. Work Credit의 핵심 가치
+==================================================
+
+예:
+
+Week 1
+
+사용자 A는 Claude 사용량이 많이 남아 있다.
+
+다른 사람 Task 수행
+→ +1,500 WC
+
+
+Week 2
+
+사용자 A는 자신의 AI quota가 부족하다.
+
+자신의 Task 등록
+→ -1,000 WC
+
+
+결과적으로:
+
+Unused AI today
+→ Verified Work
+→ Work Credit
+→ Stored Work Capacity
+→ AI Work Tomorrow
+
+가 된다.
+
+
+==================================================
+21. 초기 수익 모델
+==================================================
+
+초기에는 Work Credit과 현금을 섞지 않는다.
+
+TaskHub의 수익은 광고/스폰서에서 만든다.
+
+가능한 광고주:
+
+- AI 업체
+- GPU cloud
+- Server hosting
+- IDE
+- Developer SaaS
+- AI API provider
+- Dataset company
+- AI development tools
+
+
+구조:
+
+User Economy
+
+AI Work
+↔ Work Credit
+↔ AI Work
+
+
+TaskHub Revenue
+
+Advertiser
+→ 광고료
+→ TaskHub
+
+
+웹 배너/스폰서 광고를 직접 판매할 수 있다.
+
+초기에는 포인트 구매/현금화보다 법적/운영적으로 단순한 구조를 지향한다.
+
+
+==================================================
+22. GitHub의 역할
+==================================================
+
+GitHub는 사용자 UX의 중심이 아니다.
+
+TaskHub 뒤에서 version control infrastructure 역할을 한다.
+
+TaskHub가 자동 처리:
+
+- Repo 연결
+- Workspace
+- Branch
+- Commit
+- Push
+- Pull Request
+- CI
+- Merge 지원
+
+
+사용자가 보는 개념은:
+
+Task
+Work
+Result
+Reward
+
+뿐이어야 한다.
+
+
+==================================================
+23. Private Repository 전략
+==================================================
+
+초기 MVP는 가능하면 Public Repository 중심으로 시작한다.
+
+Private Repo는 다음 문제를 발생시킨다.
+
+- 기업 IP
+- NDA
+- API key
+- Credentials
+- Personal data
+- Source-code confidentiality
+
+
+따라서 초기 beta에서는 Public Repository를 우선하고,
+사용자가 생긴 뒤 isolated sandbox와 permission architecture를 추가해 Private Repo를 지원한다.
+
+
+==================================================
+24. 약관 준수 원칙
+==================================================
+
+TaskHub는 consumer AI subscription의 계정 접근권을 직접 거래하지 않는다.
+
+TaskHub가 하지 않는 것:
+
+- ChatGPT Pro credential 수집
+- Claude Max credential 수집
+- 사용자 AI 계정 공유
+- 남은 quota pooling
+- 사용자 대신 AI subscription 로그인
+- 다른 사용자의 prompt를 consumer subscription에 서버에서 자동 라우팅
+- consumer subscription을 TaskHub backend처럼 직접 운영
+
+
+각 Worker는 자기 환경에서
+자신이 합법적으로 사용할 수 있는 AI tool을 사용한다.
+
+
+현재 V1의 원칙:
+
+"AI-assisted one-click execution"
+
+이지,
+
+"Post → 남의 consumer subscription이 서버에서 자동 실행"
+
+이 아니다.
+
+
+장기적으로 OpenAI/Anthropic/Google 등 AI provider와 공식 partner integration 또는 명시적 허용이 확보되면 더 높은 수준의 자동화를 추가한다.
+
+
+==================================================
+25. 양측 AI 자동화 철학
+==================================================
+
+Requester와 Worker 모두 최대한 자기 AI를 사용한다.
+
+
+Requester side AI:
+
+- 자연어 요청 이해
+- Repository 분석
+- Relevant files 탐색
+- TaskSpec 생성
+- Acceptance criteria 생성
+- AI requirement 추천
+- 결과 요약 및 검토 지원
+
+
+Worker side AI:
+
+- Task package 이해
+- Repository 분석
+- 코드 수정
+- 테스트 수행
+- 결과 생성
+- Revision 처리
+
+
+TaskHub는 두 AI 사이에서:
+
+- Task 표준화
+- Matching
+- Verification
+- Provenance
+- Credit settlement
+- Reputation
+
+을 담당한다.
+
+
+==================================================
+26. 핵심 차별점
+==================================================
+
+TaskHub의 핵심은 단순한 AI coding marketplace가 아니다.
+
+차별화 포인트는 크게 세 가지다.
+
+
+1. Frictionless AI Task Handoff
+
+자연어 한마디를 검증 가능한 coding task로 변환하고,
+GitHub 작업 환경을 자동 준비한다.
+
+
+2. AI Execution Provenance
+
+누가,
+어떤 AI로,
+어떤 input에 대해,
+어떤 설정으로,
+어떤 결과물을 만들었는지
+기록하고 검증한다.
+
+
+3. AI Work Credit Economy
+
+오늘 남아서 소멸할 AI capacity를
+검증된 작업으로 바꾸고,
+그 가치를 미래에 사용할 Work Credit으로 저장한다.
+
+
+==================================================
+27. 장기적 특허/IP 후보 개념
+==================================================
+
+핵심 IP 후보는 단순한 AI marketplace가 아니다.
+
+중요한 개념은:
+
+"Non-transferable expiring AI entitlement
+→ verified task execution
+→ persistent work credit
+→ future AI-assisted work"
+
+이다.
+
+즉 AI subscription quota 자체를 양도하지 않고,
+실제 검증된 작업으로 변환한 후
+장기 존속 가능한 별도 work value로 바꾸는 구조다.
+
+
+또 다른 후보:
+
+Expiration-aware AI task routing
+
+예:
+
+- Remaining quota
+- Reset time
+- Expiration urgency
+- Worker success rate
+- Model capability
+- Reward
+- Latency
+
+등을 고려해 Task를 적절한 Worker에게 배정하는 구조.
+
+
+==================================================
+28. 초기 MVP 범위
+==================================================
+
+MVP에서는 다음만 만든다.
+
+필수:
+
+- GitHub login / GitHub App
+- User profile
+- Repository 선택
+- 자연어 Task 입력
+- Requester AI 기반 TaskSpec 생성
+- Task Marketplace
+- Worker capability 등록
+- AI Requirement
+- Task matching
+- Accept
+- Workspace 자동 준비
+- TaskHub Worker
+- Submit
+- 자동 commit/push/PR
+- CI/Test 확인
+- Execution Receipt
+- Requester Approve / Request Changes
+- Work Credit ledger
+- Escrow
+- Worker reputation
+
+
+MVP에서 제외:
+
+- 현금 구매
+- 현금 출금
+- Crypto
+- 사용자 간 포인트 송금
+- Consumer AI credential 수집
+- Subscription pooling
+- Fully autonomous consumer subscription routing
+- 복잡한 Dynamic Auction
+- 자체 foundation model
+- Private repository full support
+- 복잡한 dispute system
+
+
+==================================================
+29. MVP 이상적인 UX
+==================================================
+
+Requester:
+
+1.
+GitHub Repo 선택
+
+2.
+"이거 버그 있는데 고쳐줘."
+
+3.
+Requester AI가 자동으로 Task 작성
+
+4.
+[Post]
+
+
+Worker:
+
+1.
+자신에게 적합한 Task 표시
+
+2.
+[Accept & Work]
+
+3.
+자기 AI가 작업
+
+4.
+[Submit]
+
+
+Requester:
+
+1.
+AI가 결과 요약
+
+2.
+Tests / Execution Proof 확인
+
+3.
+[Approve]
+
+4.
+Work Credit 지급
+
+
+즉 최종 사용자가 느끼는 흐름은:
+
+Requester:
+Repo → 말하기 → Post
+
+Worker:
+Accept → AI Work → Submit
+
+Requester:
+Review → Approve
+
+정도로 단순해야 한다.
+
+
+==================================================
+30. 주요 화면 후보
+==================================================
+
+MVP 핵심 화면:
+
+1. Explore
+   - 작업 Marketplace
+
+2. Create Task
+   - Repository 선택
+   - 자연어 요청
+   - AI-generated TaskSpec
+   - Reward
+
+3. Task Detail
+   - 작업 상세
+   - AI Requirement
+   - Reward
+   - Validation
+   - Accept
+
+4. Worker Workspace
+   - Task prompt
+   - Workspace open
+   - Execution status
+   - Submit
+
+5. Dashboard
+   - 내가 요청한 작업
+   - 내가 수행 중인 작업
+   - 완료 작업
+   - Work Credit
+
+6. Profile
+   - Reputation
+   - AI tools/capabilities
+   - Completed tasks
+   - Verification history
+
+7. Result/Review
+   - 변경 요약
+   - Tests
+   - Execution Proof
+   - Approve / Request Changes
+
+
+==================================================
+31. Worker Capability Profile
+==================================================
+
+예:
+
+cho-dev
+
+AI Tools:
+
+Claude Max
+Status: Attested / Client Verified
+
+GPT 계열
+Status: Client Verified / Verified
+
+Cursor
+Status: Attested
+
+Local Qwen
+Hardware: RTX 5090
+
+
+Performance:
+
+Completed Tasks: 128
+PR Acceptance: 94.1%
+Average Delivery: 18 min
+Execution Verification Rate: 96.7%
+
+Skills:
+
+Python
+PyTorch
+CUDA
+React
+TypeScript
+
+
+==================================================
+32. Task 상태
+==================================================
+
+Task lifecycle 후보:
+
+DRAFT
+OPEN
+MATCHING
+CLAIMED
+EXECUTING
+SUBMITTED
+VERIFYING
+AWAITING_APPROVAL
+REVISION_REQUESTED
+COMPLETED
+FAILED
+DISPUTED
+CANCELLED
+
+
+==================================================
+33. 핵심 데이터 엔티티
+==================================================
+
+초기 DB entity 후보:
+
+users
+repositories
+tasks
+task_claims
+submissions
+executions
+execution_receipts
+verifications
+model_registry
+worker_capabilities
+point_accounts
+point_transactions
+reviews
+github_installations
+
+
+==================================================
+34. Work Credit Ledger 원칙
+==================================================
+
+단순히 users.balance만 변경하지 않는다.
+
+모든 이동을 ledger로 기록한다.
+
+예:
+
+Requester
+→ Task Escrow
+→ Worker
+
+또는
+
+Task Escrow
+→ Requester Refund
+
+
+핵심 entity:
+
+point_accounts
+point_transactions
+
+
+==================================================
+35. 초기 성공 기준
+==================================================
+
+첫 번째 milestone:
+
+서로 모르는 사용자 A와 B 사이에서
+
+A:
+Task 생성
+300 WC escrow
+
+B:
+Accept
+자기 AI로 작업
+Submit
+
+TaskHub:
+Verification
+
+A:
+Approve
+
+B:
++300 WC
+
+라는 거래가 실제로 반복되는지 확인한다.
+
+
+초기 목표:
+
+10 completed tasks
+→ 100
+→ 1,000
+
+
+==================================================
+36. 가장 중요한 초기 지표
+==================================================
+
+1. Task Claim Rate
+   작업이 실제로 Worker에게 선택되는가
+
+2. Task Completion Rate
+   Task가 끝까지 완료되는가
+
+3. Time-to-Claim
+   Reward가 적절한가
+
+4. Time-to-Completion
+   Worker+AI 생산성이 높은가
+
+5. PR Acceptance Rate
+   결과 품질이 충분한가
+
+6. Verification Failure Rate
+   Model cheating/품질 문제가 있는가
+
+7. Repeat Requester Rate
+   Requester가 반복 사용하고 있는가
+
+8. Earn → Spend Rate
+   Work Credit을 번 사용자가 나중에 자기 Task를 요청하는가
+
+
+특히 Earn → Spend Rate가 매우 중요하다.
+
+이 값이 높으면:
+
+"Unused AI Capacity → Stored Future Work"
+
+라는 핵심 가설이 실제로 작동하는 것이다.
+
+
+==================================================
+37. V2 로드맵
+==================================================
+
+MVP 검증 후 추가:
+
+- Private Repository
+- Isolated Sandbox
+- TaskHub Desktop App 강화
+- Automatic Reward Recommendation
+- AI Automatic Judge
+- Advanced Execution Verification
+- Advanced Reputation
+- Model Benchmark
+- Dispute System
+- Better Context Selection
+- Automatic relevant file detection
+- Security scan
+
+
+==================================================
+38. V3 로드맵
+==================================================
+
+장기적으로는 다양한 AI capacity를 하나의 Task Exchange에서 경쟁시킨다.
+
+Task
+   │
+   ├─ Human + Consumer AI
+   ├─ Official API Agent
+   ├─ Local GPU
+   ├─ Enterprise AI Capacity
+   └─ Partner AI Capacity
+
+
+TaskHub Router가 다음을 고려한다.
+
+- Price
+- Model capability
+- Success probability
+- Latency
+- Reputation
+- Verification level
+- Available capacity
+- Expiration/reset time
+
+
+궁극적으로는:
+
+AI Work Exchange
+
+로 확장한다.
+
+
+==================================================
+39. 장기 Vision
+==================================================
+
+GitHub는 첫 번째 application일 뿐이다.
+
+향후:
+
+Coding
+Research
+Documents
+Data analysis
+Image
+Video
+3D
+CAD
+Simulation
+
+등 모든 AI-assisted task를 거래할 수 있다.
+
+
+최종 구조:
+
+REQUESTS
+   ↓
+AI Work Demand
+   ↓
+TASK EXCHANGE
+   ↓
+Consumer AI / API / Local Compute / Enterprise Capacity
+   ↓
+Verified Work
+   ↓
+Work Credit
+
+
+==================================================
+40. 현재 확정된 중요한 의사결정
+==================================================
+
+1. 서비스 1차 목표는 Coding Task Marketplace다.
+
+2. 사용자 양측 UX는 최대한 단순해야 한다.
+
+3. Requester도 자기 AI로 Task 생성/정리 과정을 자동화한다.
+
+4. Worker도 자기 AI로 실제 작업을 수행한다.
+
+5. TaskHub는 Git workflow를 최대한 숨긴다.
+
+6. 특정 AI 모델 또는 capability 조건을 Task에 걸 수 있다.
+
+7. 모델/실행 검증을 위한 Execution Proof가 필요하다.
+
+8. 검증 수준은 Verified / Client Verified / Attested로 나눈다.
+
+9. Work Credit은 초기에는 현금과 완전히 분리한다.
+
+10. Work Credit은 Task 수행으로 벌고 Task 요청에만 쓴다.
+
+11. 현금 구매/출금/직접 송금은 MVP에서 하지 않는다.
+
+12. TaskHub 초기 수익은 광고/스폰서 방식으로 고려한다.
+
+13. Consumer AI account credential을 TaskHub가 직접 수집하지 않는다.
+
+14. Consumer subscription quota를 서버에서 pooling/routing하지 않는다.
+
+15. 장기적으로 AI provider와 공식 integration이 가능하면 자동화 수준을 높인다.
+
+16. 핵심 제품 차별화는:
+    - Frictionless Task Handoff
+    - Execution Provenance
+    - Work Credit Economy
+
+
+==================================================
+41. 아직 확정이 필요한 항목
+==================================================
+
+다음 대화 세션에서 확정 필요:
+
+1. TaskHub Worker의 첫 구현
+   - CLI
+   - Desktop App
+   - Hybrid
+
+2. Task Claim 방식
+   - 1 worker 독점
+   - 여러 worker 경쟁
+
+3. Claim timeout
+
+4. Request Changes 최대 횟수
+
+5. Work Credit 최초 지급량
+
+6. Task Reward 산정 방식
+
+7. Model Registry 설계
+
+8. Worker AI capability를 어떻게 검증할지
+
+9. Consumer subscription에서 Execution Proof를 어느 수준까지 제공할 수 있을지
+
+10. Public repo only MVP 여부 최종 확정
+
+11. Requester AI를 어떤 방식으로 실행할지
+    - 사용자의 AI tool
+    - 공식 API
+    - Local model
+    - 혼합
+
+12. Worker AI task handoff UX
+    - 자동 Task Package
+    - Open in Claude Code / Codex / Cursor
+    - copy command
+    - desktop deep-link
+
+13. 광고 위치/상품 구조
+
+14. 이름 TaskHub 사용 여부 및 브랜딩
+
+
+==================================================
+42. 다음 GPT 세션용 지시문
+==================================================
+
+이 문서를 받은 GPT는 기존 아이디어를 새로 재설계하지 말고,
+위의 확정사항을 기본 전제로 유지해야 한다.
+
+다음 단계는 특히 다음을 중심으로 진행한다.
+
+1. Requester와 Worker 모두 3~4 interaction 안에 끝나는 UX 확정
+2. 6~7개 핵심 화면 wireframe 설계
+3. TaskHub Worker UX 결정
+4. Execution Proof 현실적 구현 방식 설계
+5. Model/Capability matching schema 확정
+6. MVP DB schema/API architecture 작성
+7. 실제 개발 가능한 프로젝트 구조 작성
+8. 이후 MVP 구현 시작
+
+
+최우선 제품 원칙:
+
+"사람이 AI를 대신 조작하는 marketplace가 아니라,
+각자의 AI가 일하고 사람은 승인만 하는 marketplace."
+
+단,
+
+"TaskHub가 consumer subscription을 직접 pooling하거나
+다른 사용자의 traffic을 consumer quota에 자동 라우팅하는 구조"
+
+는 현재 약관 문제 때문에 MVP에서는 사용하지 않는다.
+
+
+==================================================
+END OF DOCUMENT
+==================================================

@@ -1,0 +1,39 @@
+{
+  "task": "TH-034",
+  "status": "IN_PROGRESS",
+  "summary": [
+    "사용자 요청으로 단일 tig 대화형 UX·최초 설정·로컬 AI 명세 작성 구현 범위 등록. PR8 위 후속 브랜치."
+  ],
+  "checks": [
+    {
+      "command": "git status; team.py sync",
+      "result": "passed",
+      "details": "깨끗한 PR8 기준, 열린 PR8 및 담당 범위 확인."
+    }
+  ],
+  "blockers": [],
+  "next": {
+    "timeistoken": {
+      "task": "TH-034",
+      "action": "대화형 CLI와 공식 local AI adapter 구현·검증",
+      "dependsOn": "TH-033 게시 함수"
+    },
+    "rhkim00": {
+      "task": "TH-030",
+      "action": "기존 웹 온보딩 범위 유지, 새 CLI 안내 확인",
+      "dependsOn": "PR8 및 TH034 인계"
+    }
+  },
+  "schemaVersion": 1,
+  "author": "timeistoken",
+  "createdAt": "2026-09-10T12:11:01.295911+00:00",
+  "branch": "feat/TH-034-interactive-requester",
+  "baseCommit": "c45b3a0ce9b784351d75e232297ea66bcc75c3db",
+  "files": [
+    "docs/coordination/BOARD.md",
+    "docs/coordination/NOW.md",
+    "docs/coordination/assignments.json",
+    "docs/coordination/tasks/TH-034.md",
+    "docs/product/00_confirmed.md"
+  ]
+}

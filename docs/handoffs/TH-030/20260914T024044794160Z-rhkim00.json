@@ -1,0 +1,60 @@
+{
+  "task": "TH-030",
+  "status": "REVIEW",
+  "summary": [
+    "사용자 피드백 '자동화됐다면 왜 묻나': 증거(커밋·변경·로컬 AI 세션)가 있으면 작업 설명 질문을 하지 않고 곧바로 자동 초안. 직접 설명은 `tig \"설명\"` 인자(commander variadic argument), 세션에 저장된 사용자의 직접 입력은 자동 재사용, 증거가 전혀 없을 때만 Describe the work 질문",
+    "pending(준비된) 요청은 다음 실행에서 바로 검토 화면; later면 보관 후 종료. 저장된 요청 안내에 AUTO 원문 전체를 출력하던 문제 제거. AUTO 요청 텍스트에서 커밋 상대 시각 제거 → 프로젝트가 그대로면 저장 초안 재사용(AI 재호출 없음)",
+    "보상: collectReward(request, ui, previous)로 요청자가 직전에 쓴 금액(prefs.lastReward)만 Enter 기본값. AI 산출 금액 없음(P-022). 처음엔 입력",
+    "테스트: requester PTY 흐름을 새 순서(설명 질문 없음, pending 즉시 검토, 취소는 보상 질문에서)로 갱신, 헬퍼가 타임아웃 시에도 화면 기록을 실패 메시지에 포함(child.wait TimeoutExpired 처리), drive()가 stderr를 오류에 첨부"
+  ],
+  "checks": [
+    {
+      "command": "npx tsc --noEmit; npm test (실제 PostgreSQL)",
+      "result": "passed",
+      "details": "100/100: requester PTY 새 흐름(설명 질문 없음·pending 즉시 검토·취소는 보상 질문에서), wizard/evidence 기존 테스트 유지"
+    },
+    {
+      "command": "실제 실행: 샘플 프로젝트(Codex 한도 세션 fixture) → tig → 증거 표시 → 질문 없이 초안 → 보상 입력(첫 회) → Claude 자동 선택 → Worker AI [claude / opus / medium] Enter → 검토(later). 이어서 tig → 'A prepared request is waiting to be published. Reviewing it now.' → 검토 화면",
+      "result": "passed",
+      "details": "초안 제목 'Make div() return None on zero divisor and add pytest tests for sub() and div()'"
+    },
+    {
+      "command": "python3 scripts/check_workspace.py; git diff --check",
+      "result": "passed",
+      "details": "문서 링크·공백 통과"
+    }
+  ],
+  "blockers": [
+    "P-022는 '보상·범위가 명확할 때만 확인 없이 진행'이다. 증거 기반 자동 초안은 최종 검토 화면의 게시 확인을 유지하므로 예치 전 확인은 남아 있으나, 설명 질문 생략과 직전 금액 기본값은 유찬 확인 필요",
+    "`tig <description>` 인자 방식은 셸 인용 부담이 있음 — 웹/에디터 연동에서 다른 입력 경로 검토"
+  ],
+  "next": {
+    "timeistoken": {
+      "task": "TH-036",
+      "action": "질문 없는 자동 초안·pending 즉시 검토·직전 금액 기본값이 P-022와 어긋나지 않는지 리뷰 후 병합",
+      "dependsOn": "이 PR 리뷰"
+    },
+    "rhkim00": {
+      "task": "TH-030",
+      "action": "실제 작업 프로젝트에서 tig 한 번으로 초안까지 가는지 사용자 검증, 웹 온보딩 안내 반영",
+      "dependsOn": "유찬 리뷰"
+    }
+  },
+  "schemaVersion": 1,
+  "author": "rhkim00",
+  "createdAt": "2026-09-14T02:40:44.778304+00:00",
+  "branch": "feat/TH-030-web-product",
+  "baseCommit": "3a9dbc8b9c947acbf88224b6137752f3ac615a14",
+  "files": [
+    "apps/cli/src/evidence.ts",
+    "apps/cli/src/main.ts",
+    "apps/cli/src/request-answers.ts",
+    "apps/cli/src/wizard.ts",
+    "docs/DEVELOPMENT.md",
+    "docs/USER_GUIDE.md",
+    "docs/contracts/day4.md",
+    "docs/coordination/tasks/TH-030.md",
+    "tests/helpers/terminal-session.py",
+    "tests/requester.test.ts"
+  ]
+}

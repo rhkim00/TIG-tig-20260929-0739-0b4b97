@@ -1,0 +1,91 @@
+{
+  "task": "TH-030",
+  "status": "REVIEW",
+  "summary": [
+    "타 머신·타 GitHub 계정 사이클 실검증: 요청 dlilab(demo-requester) → 수행 aicoss195(kimkimrh2000-bit, Claude Code, fork 경로) → PR rhkim00/test-tig-requests#2 → 제출 → 웹 승인 → PAID·수행자 200 TIG. 공개 주소=cloudflared quick tunnel + 실제 GitHub OAuth App + TIG_LOCAL_TRIAL=true 빌드 서버(검증용, TH-023 대체 아님). 기록 docs/verification/TH-030-cross-machine-cycle.md",
+    "서버: localTrial 설정(TIG_LOCAL_TRIAL, 개발 모드 밖 기본 off)으로 Git 요청 claim/start/submit 가드와 /v1/config.localTrialSubmission 제어, 계약 문구 갱신",
+    "tig doctor: Node 24·Git·GitHub CLI(2.21+, 로그인)·Codex/Claude Code(구독 로그인)·Tokenisgold 연결·격리를 표로 보여주고 ✗마다 고칠 명령 표시, --json, 미준비 시 exit 1",
+    "연결/네트워크 문구: fetch failed → Cannot reach <website> 안내, 비JSON 응답 안내, 기기 코드 만료 시간·터미널 유지·만료 후 재실행 안내, 내장 주소 사용 시 tig connect --origin 안내",
+    "Claude Code 잔여량(P-018/P-053): tig claude-statusline install/uninstall(동의 후 statusLine 설정, 이전 상태줄 보관·위에 실행·복원), 상태줄에 Tig · 5h/7d 사용률과 low/spare 힌트, tig sync-claude가 client_observed 관측 전송, observe/sync-codex/sync-claude 알림 규칙 공용화(usage.ts)",
+    "문서: docs/USER_GUIDE.md(요청자/수행자 터미널 순서·오류 표), DEVELOPMENT/QUICKSTART/TRY_TOGETHER/day4 계약 갱신"
+  ],
+  "checks": [
+    {
+      "command": "npx tsc --noEmit",
+      "result": "passed",
+      "details": "타입 검사 통과"
+    },
+    {
+      "command": "npm test (실제 PostgreSQL)",
+      "result": "passed",
+      "details": "92/92: doctor 진단 5건, Claude 상태줄/관측/설치·복원/알림 억제 6건, 네트워크 오류 문구 1건 추가; 기존 API local-trial·CLI·어댑터 테스트 유지"
+    },
+    {
+      "command": "python3 scripts/check_workspace.py; git diff --check",
+      "result": "passed",
+      "details": "문서 링크·공백 통과"
+    },
+    {
+      "command": "실제 실행: tig doctor(연결/미연결), tig claude-statusline(stdin JSON), install/uninstall(임시 CLAUDE_CONFIG_DIR), tig sync-claude",
+      "result": "passed",
+      "details": "설치본(~/.local/bin/tig)에서 확인. 상태줄 절대경로 등록 및 settings.json 다른 키 보존·복원 확인"
+    },
+    {
+      "command": "실제 실행: 타 머신(aicoss195)·타 계정 tig connect → tig work --market → fork PR#2 → submit → 승인 → PAID",
+      "result": "passed",
+      "details": "2026-09-13 21:01Z PAID, settlements paid/requester_approved 1건. 요청자 실계정(rhkim00) 로그인·5000 TIG 발행까지 확인, 요청자까지 실계정인 사이클은 not_run"
+    },
+    {
+      "command": "웹 E2E(npm run test:e2e)",
+      "result": "not_run",
+      "details": "이번 변경은 CLI/서버 설정·문서 범위"
+    }
+  ],
+  "blockers": [
+    ".env.example에 TIG_LOCAL_TRIAL=false 설명 추가가 필요하나 루트 파일은 TH-030 범위 밖 — 유찬이 추가 요망(문구는 docs/contracts/lifecycle.md 참고)",
+    "구독 자격 자동 검증기 미구현: 검증에서는 운영자가 plan_prices/entitlements를 직접 기록(verification 문서의 스크립트). 운영 전 필수",
+    "미결정(유찬): 상태줄/hook 설치를 첫 연결에서 제안할지(DRAFT-03), 사용량 조회 주기/자동 sync(QUOTA-03), OS 알림 채널(P-046); 정식 스테이징 배포·프로세스 감독(TH-023)"
+  ],
+  "next": {
+    "timeistoken": {
+      "task": "TH-036",
+      "action": "이 브랜치 리뷰: localTrial 플래그·doctor/statusline 명령·문서 확인 후 병합 여부 결정; .env.example TIG_LOCAL_TRIAL 문구 추가; DRAFT-03/QUOTA-03/P-046 결정",
+      "dependsOn": "이 PR 리뷰"
+    },
+    "rhkim00": {
+      "task": "TH-030",
+      "action": "사용자 승인 순서 3·4: tig watch 기반 요청 초안 자동 채우기(확인 1회 유지), 모델/effort 추천(자동 선택 아님); 요청자까지 실계정인 사이클 1회",
+      "dependsOn": "유찬의 DRAFT-02/03 세부 결정"
+    }
+  },
+  "schemaVersion": 1,
+  "author": "rhkim00",
+  "createdAt": "2026-09-13T22:49:08.023516+00:00",
+  "branch": "feat/TH-030-web-product",
+  "baseCommit": "d192d90d96f453609db00b617a1dbd27e82f6cd8",
+  "files": [
+    "apps/api/src/app.ts",
+    "apps/api/src/config.ts",
+    "apps/cli/src/claude-usage.ts",
+    "apps/cli/src/client.ts",
+    "apps/cli/src/doctor.ts",
+    "apps/cli/src/main.ts",
+    "apps/cli/src/usage.ts",
+    "apps/cli/src/wizard.ts",
+    "docs/DEVELOPMENT.md",
+    "docs/REQUESTER_QUICKSTART.md",
+    "docs/TRY_TOGETHER.md",
+    "docs/USER_GUIDE.md",
+    "docs/WORKER_QUICKSTART.md",
+    "docs/contracts/day4.md",
+    "docs/contracts/lifecycle.md",
+    "docs/coordination/tasks/TH-030.md",
+    "docs/verification/TH-030-cross-machine-cycle.md",
+    "tests/api.test.ts",
+    "tests/claude-usage.test.ts",
+    "tests/cli.test.ts",
+    "tests/doctor.test.ts",
+    "tests/e2e/server.ts",
+    "tests/requester.test.ts"
+  ]
+}

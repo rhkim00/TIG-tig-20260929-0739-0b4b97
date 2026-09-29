@@ -1,0 +1,36 @@
+{
+  "task": "TH-038",
+  "status": "REVIEW",
+  "summary": [
+    "옛 tig가 자동 초안으로 준비해 둔 대기 요청(세션 request가 'AUTO:'이거나 plan의 destination이 'new'가 아닌 것, 읽을 수 없는 plan 포함)은 새 tig가 이어받지 않는다: 디스크에 두고(tig request show <id>) 세션을 비운 뒤 처음부터 요청자에게 묻는다. 사용자 실사용에서 9/23 05:58 옛 흐름의 AI 초안 요청이 그대로 리뷰 화면에 올라온 문제의 수정. 회귀 테스트 추가."
+  ],
+  "checks": [
+    {
+      "command": "npx tsc --noEmit; node --import tsx --test tests/*.test.ts (api 제외; requester는 다른 clone .env로 DB 포함 실행); git diff --check; npm run cli:install",
+      "result": "passed",
+      "details": "wizard 30개 포함 비-DB 전부 통과, requester DB/PTY 테스트 통과, 설치 CLI 갱신."
+    }
+  ],
+  "blockers": [],
+  "next": {
+    "timeistoken": {
+      "task": "TH-038",
+      "action": "설치된 tig로 새 요청 흐름 재확인; 리뷰 후 push/PR",
+      "dependsOn": "feat/TH-038-requester-flow"
+    },
+    "rhkim00": {
+      "task": "TH-030",
+      "action": "TH-038 PR 리뷰",
+      "dependsOn": "TH-038 공유"
+    }
+  },
+  "schemaVersion": 1,
+  "author": "timeistoken",
+  "createdAt": "2026-09-29T05:36:16.054491+00:00",
+  "branch": "feat/TH-038-requester-flow",
+  "baseCommit": "ee26a7e32875b682693d4266a7560d0474ab0b28",
+  "files": [
+    "apps/cli/src/wizard.ts",
+    "tests/wizard.test.ts"
+  ]
+}

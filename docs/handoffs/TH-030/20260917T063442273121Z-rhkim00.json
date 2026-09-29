@@ -1,0 +1,104 @@
+{
+  "task": "TH-030",
+  "status": "REVIEW",
+  "summary": [
+    "요청은 이제 고른 파일 묶음이 아니라 '작업하던 저장소 그 자체'다. request-tree.ts가 임시 git index로 부모 없는 커밋을 만들어 공개 브랜치 tig/requests/<id>에 올리고, request.md/request.json이 루트에 놓인다. 원본 .git은 발행 뒤 바이트 단위로 불변(실제 GitHub 발행으로 확인).",
+    "포함 규칙: 추적 파일은 작업 트리 바이트 그대로(수정 없는 파일은 HEAD의 blob을 재사용해 재해시하지 않는다 — core.autocrlf로 바이트가 달라지던 버그 수정). 미추적 파일은 코드로 보이거나 추적 중인 폴더 안일 때만, 개당 1MB·합계 300개/20MB 예산 안에서. 데이터 확장자는 폴더와 무관하게 항상 제외. 223GB/34,000개 미추적 연구 저장소에서 186파일/1.88MB/0.9초.",
+    "수행자 자동 실행(worker-agent.ts): 요청 브랜치를 고정 커밋으로 격리 clone 후 codex exec --sandbox workspace-write 또는 claude -p --restricted를 20분 제한·5분 heartbeat로 돌리고, 결과를 tig/results/<task-id>로 push + PR.",
+    "비밀 검사를 하나의 관문으로 통합(secret-gate.ts): push될 커밋의 모든 blob을 git cat-file --batch로 스트리밍하며 raw 바이트로 검사한다. UTF-8 디코드를 하지 않아 CP949/UTF-16 파일도 잡히고, 크기 상한이 기본 없음(예전 10MB 한도는 호출자가 원할 때만). 네 군데 흩어져 매번 다른 구멍이 나던 검사를 대체.",
+    "자동 검증 절반(settle.ts / result-git.ts / result-review.ts): 결과를 고정 커밋으로 fetch(--depth 2)해 수행자가 push 전에 쓴 것과 같은 reader로 diff를 읽고, 로컬 AI가 수락 기준에 대해 판단한다. 기계 검사만 환불할 수 있고 AI는 보류→승인 방향으로만 움직인다.",
+    "자동 검증은 의도적으로 배선하지 않았다. main.ts/work.ts 어디에서도 runSettlementPass를 부르지 않으므로 오늘 동작은 변경 전과 동일하다(요청자 승인 또는 48시간 타이머)."
+  ],
+  "checks": [
+    {
+      "command": "npx tsc --noEmit",
+      "result": "passed",
+      "details": "exit 0"
+    },
+    {
+      "command": "npm test",
+      "result": "passed",
+      "details": "315/315 (신규: request-tree, secret-gate, worker-agent, settle, result-git, result-review, tree-flow, files, request, local-ai)"
+    },
+    {
+      "command": "실제 GitHub 발행(요청자)",
+      "result": "passed",
+      "details": "rhkim00/tigdemo-tig-requests 브랜치 tig/requests/aa045c78…: 부모 0개, 미커밋 div() 포함, .env/.venv/data/results.csv/train.log 제외, 원본 저장소 HEAD/status/branch 불변"
+    }
+  ],
+  "blockers": [
+    "공유 계약 파일 packages/contracts/src/files.ts를 이번 커밋에서 변경했고 TH-030 범위에 그 한 파일을 추가했다(assignments.json). 변경은 순수 추가다: 기존 네 개의 인라인 정규식을 이름 붙은 11개 클래스 표(SECRET_PATTERNS)로 쪼개고 secretReasons / secretReasonsInBytes / containsSecretBytes를 추가했다. containsSecret의 반환값은 4,035개 입력에 대해 원본 정규식과 동일함을 테스트로 증명했다. apps/api/src/lifecycle.ts도 이 파일을 import하므로 유찬 리뷰가 필요하다.",
+    "같은 이유로 packages/contracts/src/request.ts도 범위에 추가했다. requestEnvelope에 layout?: 'bundle'|'tree'를 추가하고 renderRequest의 Setup/Package 두 문장을 layout에 따라 나눈다. layout은 optional이며 기본값을 넣지 않으므로 bundle 요청의 request.json과 request.md는 예전 CLI와 바이트 단위로 동일하다(서버가 아티팩트 바이트를 비교하므로 이 점이 중요하다). apps/api/src/request-publication.ts가 같은 layout을 읽는다. 유찬 리뷰 필요.",
+    "자동 검증 양쪽 모두 적대적 검증에서 결함 재현됨(정산 22건 중 차단 3건, 결과 검토 16건 중 차단 5건). 수정 라운드 진행 중이며 배선 전까지 사용자 영향 없음.",
+    "비밀 게이트를 TaskHub 자신의 HEAD에 돌리면 14건이 잡힌다 — 전부 테스트 fixture·문서 예시·CI 자리표시자다. 지금 호출부는 한 건이라도 걸리면 발행을 중단하므로 이 저장소는 요청으로 넘길 수 없다. 공시 후 확인받는 경로가 필요하다(유찬 결정).",
+    "제품 결정 대기: (1) 선별 발행 시 파일 '이름 목록'을 공개 브랜치에 실어도 되는가, (2) AI가 확신 없어 보류하면 48시간 뒤 자동 지급되는데 그대로 둘 것인가, (3) 코드를 실행하지 않고 diff만 읽은 판단으로 TIG를 지급해도 되는가(사용자: 나중에 정하기로).",
+    "aicoss195(수행자) 교차 검증은 이 커밋을 push한 뒤 사용자가 실행"
+  ],
+  "next": {
+    "rhkim00": {
+      "task": "TH-030",
+      "action": "push 후 aicoss195에서 git pull → tig work --watch → yes → PR/제출 → 승인·지급 확인. 그리고 evidence 파서 수정 결과로 대화 기반 파일 선별 2단계 착수 여부 판단",
+      "dependsOn": "이 커밋 push"
+    },
+    "timeistoken": {
+      "task": "TH-036",
+      "action": "저장소 통째 발행 규칙(무엇이 올라가는가), 비밀 게이트의 공시-확인 경로, 자동 검증 배선 여부 리뷰",
+      "dependsOn": "이 PR 리뷰"
+    }
+  },
+  "schemaVersion": 1,
+  "author": "rhkim00",
+  "branch": "feat/TH-030-web-product",
+  "baseCommit": "6dd3f398125c7e01d14a45ad9b2c3090effd2f50",
+  "files": [
+    "apps/api/src/app.ts",
+    "apps/api/src/github.ts",
+    "apps/api/src/request-publication.ts",
+    "apps/cli/src/client.ts",
+    "apps/cli/src/doctor.ts",
+    "apps/cli/src/evidence.ts",
+    "apps/cli/src/local-ai.ts",
+    "apps/cli/src/main.ts",
+    "apps/cli/src/request-tree.ts",
+    "apps/cli/src/requester.ts",
+    "apps/cli/src/result-git.ts",
+    "apps/cli/src/result-review.ts",
+    "apps/cli/src/secret-gate.ts",
+    "apps/cli/src/settle.ts",
+    "apps/cli/src/wizard.ts",
+    "apps/cli/src/work.ts",
+    "apps/cli/src/worker-agent.ts",
+    "apps/cli/src/worker-git.ts",
+    "apps/web/src/TaskTransaction.tsx",
+    "docs/HANDOFF-YUCHAN.md",
+    "docs/REQUESTER_ADVANCED.md",
+    "docs/USER_GUIDE.md",
+    "docs/WORKER_QUICKSTART.md",
+    "docs/contracts/day4.md",
+    "docs/contracts/requester_git.md",
+    "docs/contracts/task_api.md",
+    "docs/coordination/assignments.json",
+    "docs/notion/tig-사용안내서.md",
+    "packages/contracts/src/files.ts",
+    "packages/contracts/src/request.ts",
+    "tests/api.test.ts",
+    "tests/e2e/server.ts",
+    "tests/evidence.test.ts",
+    "tests/files.test.ts",
+    "tests/local-ai.test.ts",
+    "tests/notices.test.ts",
+    "tests/request-tree.test.ts",
+    "tests/request.test.ts",
+    "tests/requester-empty.test.ts",
+    "tests/requester.test.ts",
+    "tests/result-git.test.ts",
+    "tests/result-review.test.ts",
+    "tests/secret-gate.test.ts",
+    "tests/settle.test.ts",
+    "tests/tree-flow.test.ts",
+    "tests/wizard.test.ts",
+    "tests/work.test.ts",
+    "tests/worker-agent.test.ts"
+  ],
+  "createdAt": "2026-09-17T06:34:42.257464+00:00"
+}

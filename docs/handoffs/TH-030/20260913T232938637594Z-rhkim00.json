@@ -1,0 +1,65 @@
+{
+  "task": "TH-030",
+  "status": "REVIEW",
+  "summary": [
+    "자동 초안(유찬 승인, 순서 2): tig의 작업 설명에 auto/자동 입력 → gatherEvidence가 브랜치·14일 커밋·미커밋 변경·checkpoint 요약·Claude Code 마지막 답변(로컬 저장)을 보여주고 확인 → 로컬 AI가 초안 작성(기존 검토·게시 확인 유지). 공개 originalRequest에는 AUTO: 접두 + 커밋/경로만, AI 답변은 세션 autoNote로 로컬 AI clarification에만 전달(request.md/서버 미포함, 실행으로 확인)",
+    "tig claude-notes install/uninstall: 동의 후 settings.json hooks.Stop에 tig 항목 추가(기존 hook 유지), 런타임은 cwd·last_assistant_message만 읽어 ai-notes/<digest(root)>.json에 4000자·7일 보관, 비밀 패턴이면 저장 안 함, 항상 exit 0",
+    "모델/effort 추천(순서 4, P-016/P-052): 초안에 모델·effort가 없을 때만 근거와 함께 제시하고 Enter 또는 다른 값으로 확정. Claude는 카테고리·파일 수 규칙(sonnet/opus, medium/high), Codex는 요청자 로컬 카탈로그 첫 모델·기본 effort. 요청문에 적은 값은 그대로",
+    "문서: USER_GUIDE(auto·hook·추천), DEVELOPMENT 명령, day4 계약, TH-030 기록"
+  ],
+  "checks": [
+    {
+      "command": "npx tsc --noEmit; npm test (실제 PostgreSQL)",
+      "result": "passed",
+      "details": "96/96: evidence/hook install·uninstall/증거 렌더·공개-비공개 분리/추천 규칙·completeTerms 확정 4건 추가, 기존 요청자 PTY·마켓·API 테스트 유지"
+    },
+    {
+      "command": "실제 실행: 샘플 저장소에서 tig → auto → 증거 확인 → Claude Code 초안 → 추천(opus/medium) Enter → 준비(게시 보류)",
+      "result": "passed",
+      "details": "제목 'Calc: guard div() against zero and add pytest cases for sub() and div()'가 로컬 메모를 근거로 작성됨. 준비된 request.json의 originalRequest는 AUTO:+커밋/경로만이며 메모 원문 미포함 확인"
+    },
+    {
+      "command": "실제 실행: tig claude-notes install/uninstall(임시 CLAUDE_CONFIG_DIR, 기존 Stop hook 보존), hook stdin → ai-notes 저장",
+      "result": "passed",
+      "details": "설치본 ~/.local/bin/tig 절대경로로 등록"
+    },
+    {
+      "command": "python3 scripts/check_workspace.py; git diff --check; prettier --check (변경 파일)",
+      "result": "passed",
+      "details": "기존 트리의 prettier 경고 9개는 이 변경 이전부터 존재"
+    }
+  ],
+  "blockers": [
+    "Codex Stop hook(마지막 답변 저장)은 미구현 — Codex 사용자는 커밋·변경·checkpoint 요약만으로 auto 초안",
+    "추천 규칙의 수치(파일 수 임계값 8/20)는 초기값이며 실제 거래 데이터로 조정 필요; hook/상태줄 자동 제안(DRAFT-03)·조회 주기(QUOTA-03)·알림 채널(P-046)은 유찬 결정 대기"
+  ],
+  "next": {
+    "timeistoken": {
+      "task": "TH-036",
+      "action": "auto 초안의 공개/비공개 경계(originalRequest vs autoNote)와 hook 설치 방식 리뷰, 추천 규칙 승인 여부 결정 후 병합",
+      "dependsOn": "이 PR 리뷰"
+    },
+    "rhkim00": {
+      "task": "TH-030",
+      "action": "Codex Stop hook 추가, 웹 온보딩 화면에 doctor/auto 안내 반영, 요청자까지 실계정인 사이클 1회",
+      "dependsOn": "유찬 리뷰"
+    }
+  },
+  "schemaVersion": 1,
+  "author": "rhkim00",
+  "createdAt": "2026-09-13T23:29:38.622952+00:00",
+  "branch": "feat/TH-030-web-product",
+  "baseCommit": "9ba20703576f2ad14a65c7059f11932c662c2b31",
+  "files": [
+    "apps/cli/src/evidence.ts",
+    "apps/cli/src/local-ai.ts",
+    "apps/cli/src/main.ts",
+    "apps/cli/src/recommend.ts",
+    "apps/cli/src/wizard.ts",
+    "docs/DEVELOPMENT.md",
+    "docs/USER_GUIDE.md",
+    "docs/contracts/day4.md",
+    "docs/coordination/tasks/TH-030.md",
+    "tests/evidence.test.ts"
+  ]
+}

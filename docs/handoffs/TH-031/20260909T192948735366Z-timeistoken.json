@@ -1,0 +1,91 @@
+{
+  "task": "TH-031",
+  "status": "REVIEW",
+  "summary": [
+    "알림함의 수신자/읽음/페이지 경계/중복 전달 방지와 웹의 알림→결과 검토 연결을 구현했습니다. 금융 정산을 알림/집계 트랜잭션에서 분리해 분석 장애에도 지급을 유지합니다.",
+    "사용자 본인의 30일 요청 유형·프로젝트·직접 승인/자동 지급/환불/TIG 인사이트와 UTC 일일 snapshot, 개발 전용 실시간 샘플 미리보기를 구현했습니다. 실적과 샘플을 분리하고 분모·집계 출처/시각을 표시합니다.",
+    "참여자용 결과 다운로드와 CLI 0.2.0 inbox/read/insights/result를 구현·설치했습니다. 이번 사용자 승인으로 륜호 웹 영역도 선행 구현했으며, 륜호의 기존 브랜치/checkout은 보존하고 최신 코드 반영 절차를 기록했습니다."
+  ],
+  "checks": [
+    {
+      "command": "npm run cli:install; TIG_TEST_CLI=<설치된 main.js> npm test",
+      "result": "passed",
+      "details": "CLI 0.2.0 실제 설치, 서버/CLI 34개 통과. 실제 PostgreSQL/HTTP, 알림/집계 권한, outbox 재전달, UTC snapshot, 설치본 결과 저장/덮어쓰기 거부, 집계 실패에도 정산 commit 검증."
+    },
+    {
+      "command": "npm run build; npm run test:e2e",
+      "result": "passed",
+      "details": "빌드 및 desktop/mobile 4개 통과. 두 계정으로 Inbox→검토→다운로드→지급/환불→개인 샘플 지표 확인. 후속 저위험 CSS/표기 보완 후 빌드 및 개발 웹 smoke 확인."
+    },
+    {
+      "command": "bash scripts/dev-local.sh; live Playwright smoke; tig --version",
+      "result": "passed",
+      "details": "기존 서버를 정상 재시작하고 migration 004/005 적용. localhost:4173 Inbox/Insights 및 샘플 미리보기 동작, 0.2.0 확인."
+    },
+    {
+      "command": "python3 scripts/check_workspace.py; python3 scripts/check_workflow.py; python3 scripts/check_contracts.py; python3 -m unittest discover -s scripts -p test_team.py; git diff --check",
+      "result": "passed",
+      "details": "협업 문서/31개 작업 DAG/정적 계약, team 7개 및 diff 검사 통과. 이 head의 원격 CI는 push 후 확인 예정."
+    },
+    {
+      "command": "tig doctor",
+      "result": "failed",
+      "details": "실제 AI 실행에 필요한 격리 probe available=false. 이번 알림/인사이트의 실패가 아니며 AI 자동 실행은 차단 유지."
+    }
+  ],
+  "blockers": [
+    "실제 AI 격리/권한·자원·모델 검증, 신뢰 가능한 구독 확인/외부 OAuth, 모델 추천·Git PR/Apply changes, 이메일, 전체 데이터 삭제/보존·운영 배포가 남아 있습니다.",
+    "기존 선행 PR/main 미병합. 륜호의 TH-030 브랜치는 TH-029 기준이므로 이번 TH-031을 먼저 받아야 합니다."
+  ],
+  "next": {
+    "timeistoken": {
+      "task": "TH-031",
+      "action": "PR #6 상호 리뷰와 CI 확인 후, 실제 AI runner 격리/권한 및 구독 증명 후속 작업의 구현 계약을 기록하고 진행한다.",
+      "dependsOn": "현재 알림/개인 집계는 검증, 실제 AI 실행은 별도 환경 검증 필요"
+    },
+    "rhkim00": {
+      "task": "TH-030",
+      "action": "NOW의 안내로 origin/feat/TH-031-inbox-insights를 먼저 통합한다. 새 Inbox/Insights/다운로드의 모바일/접근성을 리뷰하고 남은 기기·AI 연결/설치/실패 복구 온보딩을 이어간다.",
+      "dependsOn": "본인 미커밋 작업 보존 후 TH-031 코드/계약/인수인계 반영; 같은 기능 중복 구현 금지"
+    }
+  },
+  "schemaVersion": 1,
+  "author": "timeistoken",
+  "createdAt": "2026-09-09T19:29:48.729061+00:00",
+  "branch": "feat/TH-031-inbox-insights",
+  "baseCommit": "b284e1422701257feea2c792feacc3550efb7853",
+  "files": [
+    ".github/workflows/application.yml",
+    "README.md",
+    "apps/api/src/app.ts",
+    "apps/api/src/insights.ts",
+    "apps/api/src/lifecycle.ts",
+    "apps/cli/src/main.ts",
+    "apps/web/src/InboxPanel.tsx",
+    "apps/web/src/InsightsPanel.tsx",
+    "apps/web/src/TaskTransaction.tsx",
+    "apps/web/src/api.ts",
+    "apps/web/src/download.ts",
+    "apps/web/src/main.tsx",
+    "apps/web/src/style.css",
+    "apps/worker/src/jobs.ts",
+    "apps/worker/src/notifications.ts",
+    "docs/COLLABORATION.md",
+    "docs/DEVELOPMENT.md",
+    "docs/TRY_TOGETHER.md",
+    "docs/contracts/inbox_insights.md",
+    "docs/coordination/NOW.md",
+    "docs/coordination/tasks/TH-030.md",
+    "docs/coordination/tasks/TH-031.md",
+    "docs/verification/TH-031-inbox-insights.md",
+    "package-lock.json",
+    "package.json",
+    "packages/contracts/src/insights.ts",
+    "packages/contracts/src/openapi.ts",
+    "packages/db/migrations/004_inbox_insights.sql",
+    "packages/db/migrations/005_insight_indexes.sql",
+    "tests/api.test.ts",
+    "tests/e2e/server.ts",
+    "tests/e2e/workspace.spec.ts"
+  ]
+}

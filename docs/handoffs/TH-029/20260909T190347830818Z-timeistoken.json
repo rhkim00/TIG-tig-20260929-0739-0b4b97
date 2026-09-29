@@ -1,0 +1,84 @@
+{
+  "task": "TH-029",
+  "status": "REVIEW",
+  "summary": [
+    "Day 1~2 기반을 포함한 앱에 수락/실행/중단/권한 회수/필수 결과 검사/48시간 검토/지급·환불을 구현했습니다. 개발 fixture로 두 계정이 실제 DB와 HTTP 거래를 테스트할 수 있습니다.",
+    "Node 24 CLI tarball과 로컬 tig 설치, 웹 최초 거래 연결, 두 PC 공유 서버 접속/실행 안내를 추가했습니다. 실제 AI 실행/구독 검증/외부 배포 완료로 표시하지 않습니다.",
+    "TIG 루트에 앱을 실행하고 기존 worktree를 내부에 보존했습니다. 륜호에게 main.tsx, TaskTransaction.tsx, style.css의 후속 웹 책임을 넘깁니다. README의 최신 실행 링크를 위해 문서 범위를 명시했습니다."
+  ],
+  "checks": [
+    {
+      "command": "TIG_TEST_CLI=<설치된 CLI main.js> npm test",
+      "result": "passed",
+      "details": "28개 통과. 실제 PostgreSQL, 수락/정산 경합과 롤백, 권한/generation, 정확한 48시간, 설치된 CLI 제출→웹 승인 검증."
+    },
+    {
+      "command": "npm run build; npm run test:e2e",
+      "result": "passed",
+      "details": "빌드와 desktop/mobile 4개 통과. 두 브라우저 지급/환불·실패 결과 수정·기존 게시/취소 검증."
+    },
+    {
+      "command": "npm run cli:install; tig --version; live web smoke",
+      "result": "passed",
+      "details": "~/.local/bin/tig 0.1.0 설치 실행. localhost:4173 실제 개발 웹 로그인/역할 전환/테스트 버튼 확인."
+    },
+    {
+      "command": "python3 scripts/check_workspace.py; python3 scripts/check_workflow.py; python3 scripts/check_contracts.py; python3 -m unittest discover -s scripts -p test_team.py; git diff --check",
+      "result": "passed",
+      "details": "협업 문서/DAG/정적 상태계약, team 7개 테스트, whitespace 검사 통과. PR #5의 이 코드에 대한 CI는 push 후 확인 예정."
+    }
+  ],
+  "blockers": [
+    "공개 베타 전 실제 AI runner/제공사 조건·구독 검증/외부 OAuth/모델 추천/Git PR 제출/데이터 보존·삭제/이메일/배포·복구가 남아 있습니다.",
+    "main 및 선행 PR은 미병합. 이 개발 웹은 loopback/SSH 포워딩 전용이며 외부 공개 서비스가 아닙니다."
+  ],
+  "next": {
+    "timeistoken": {
+      "task": "TH-029",
+      "action": "PR #5 거래/권한/정산을 상호 리뷰하고, 후속 실제 runner·격리/구독 검증 작업 계약과 브랜치를 기록한다. 웹 변경은 륜호에게 인계한다.",
+      "dependsOn": "현재 거래 테스트 통과; 실제 제공사/OS 검증은 별도"
+    },
+    "rhkim00": {
+      "task": "TH-030",
+      "action": "feat/TH-030-web-product를 본인 계정으로 clone, START_HERE/team sync/TRY_TOGETHER 읽기. TaskTransaction의 모바일 결과/검토 버튼·오류 복구와 연결/설치 UX를 개선하고 양쪽 다음 행동을 기록해 commit/push/PR한다.",
+      "dependsOn": "PR #5 최신 코드를 시작 기준으로 사용; API 변경 요구는 유찬에게 인수인계로 전달"
+    }
+  },
+  "schemaVersion": 1,
+  "author": "timeistoken",
+  "createdAt": "2026-09-09T19:03:47.825509+00:00",
+  "branch": "feat/TH-029-task-lifecycle",
+  "baseCommit": "ee78b602b0446eacb49a26c521349b1dfd710eab",
+  "files": [
+    ".github/workflows/application.yml",
+    "README.md",
+    "apps/api/src/app.ts",
+    "apps/api/src/domain.ts",
+    "apps/api/src/lifecycle.ts",
+    "apps/cli/src/main.ts",
+    "apps/web/src/TaskTransaction.tsx",
+    "apps/web/src/main.tsx",
+    "apps/web/src/style.css",
+    "apps/worker/src/jobs.ts",
+    "docs/DEVELOPMENT.md",
+    "docs/TRY_TOGETHER.md",
+    "docs/contracts/lifecycle.md",
+    "docs/coordination/NOW.md",
+    "docs/coordination/WORKFLOW.md",
+    "docs/coordination/assignments.json",
+    "docs/coordination/tasks/TH-029.md",
+    "docs/coordination/tasks/TH-030.md",
+    "docs/verification/TH-029-transactions.md",
+    "package.json",
+    "packages/contracts/src/index.ts",
+    "packages/contracts/src/lifecycle.ts",
+    "packages/contracts/src/openapi.ts",
+    "packages/db/migrations/003_lifecycle.sql",
+    "scripts/check_contracts.py",
+    "scripts/dev-local.sh",
+    "scripts/install-cli.mjs",
+    "scripts/package-cli.mjs",
+    "tests/api.test.ts",
+    "tests/e2e/workspace.spec.ts"
+  ]
+}

@@ -1,0 +1,85 @@
+{
+  "task": "TH-034",
+  "status": "REVIEW",
+  "summary": [
+    "CLI0.4.0: tig 단독 실행, 최초 TIG/GitHub/프로젝트/Codex 연결 안내와 설정 기억, 자연어 요청·선별 파일·공식 local Codex 명세 작성·누락 조건 질문 구현.",
+    "공개/TIG 미리보기에서 yes로 게시, JSON/digest 명령 내부화, 저장 후 재실행 시 AI 재호출 없이 게시. 원본 Git 보존·작성 중 코드 변경 검증·API 키 환경 차단·process 취소·터미널 제어문자 제거.",
+    "설치본과 사용법/고급 명령/정책 검토/계약/양쪽 다음 행동 문서를 갱신. PR9는 PR8 위 후속이며 main 병합/공개 배포는 수행하지 않음."
+  ],
+  "checks": [
+    {
+      "command": "npm run build; npm run cli:install; npm run typecheck",
+      "result": "passed",
+      "details": "Node24 TS/Vite 및 CLI0.4.0 패키지/로컬 설치. 실제 시작 화면과 Ctrl+C 확인."
+    },
+    {
+      "command": "TIG_TEST_CLI=<installed main.js> npm test",
+      "result": "passed",
+      "details": "전체50개 통과. 이후 최초 Git baseline 및 yes/login 입력 검증 추가 후 requester/wizard17개 재실행 통과. 실제 HTTP/PG/Git/PTy; AI/GitHub 경계 fixture."
+    },
+    {
+      "command": "npm run test:e2e",
+      "result": "passed",
+      "details": "desktop/mobile6개. 거래·정산·기기·Git 요청 링크 회귀."
+    },
+    {
+      "command": "python3 scripts/check_workspace.py; check_workflow.py; check_contracts.py; unittest scripts/test_team.py and scripts/probes; git diff --check",
+      "result": "passed",
+      "details": "문서·34작업DAG·정적8상태19전이·team7/probes4. 최초 tests경로는0개였으며 실제scripts경로재실행. 최종 스테이징 직전 정적 검사를 다시 확인."
+    },
+    {
+      "command": "local web and API health",
+      "result": "passed",
+      "details": "localhost4173/4310 health HTTP200. 실제 외부 공개 쓰기/구독 추론 없음."
+    }
+  ],
+  "blockers": [
+    "실제 Codex 구독 추론/관리설정 조합 및 외부 공개 GitHub 게시 실증 미수행. 자동 작성은 Codex만 연결; Claude 자동 작성·수행자 AI/매칭·공개 배포·Windows/macOS native는 후속.",
+    "자동 작성은현재약160KB/98파일로선별필요. 기존AI대화자동상속없음."
+  ],
+  "next": {
+    "timeistoken": {
+      "task": "TH-034",
+      "action": "PR8→PR9 CI/리뷰·병합 결정 후 지정한 작은 프로젝트에서 실제 Codex 명세/공개 게시 확인",
+      "dependsOn": "사용자가 공개 범위를 정한 프로젝트, 공식CodexChatGPT로그인. main병합은유찬결정."
+    },
+    "rhkim00": {
+      "task": "TH-030",
+      "action": "단일 tig 흐름·설정 기억·실패 복구 안내를 웹 온보딩에 반영; CLI 중복 개발하지 않음",
+      "dependsOn": "PR9사용법/계약과최신main기준확인"
+    }
+  },
+  "schemaVersion": 1,
+  "author": "timeistoken",
+  "createdAt": "2026-09-10T12:32:43.413955+00:00",
+  "branch": "feat/TH-034-interactive-requester",
+  "baseCommit": "0be3bf0a135867a2623d90c521ac54ccbeead48e",
+  "files": [
+    ".github/workflows/application.yml",
+    "README.md",
+    "apps/cli/src/client.ts",
+    "apps/cli/src/drafts.ts",
+    "apps/cli/src/local-ai.ts",
+    "apps/cli/src/main.ts",
+    "apps/cli/src/requester.ts",
+    "apps/cli/src/terminal.ts",
+    "apps/cli/src/wizard.ts",
+    "docs/REQUESTER_ADVANCED.md",
+    "docs/REQUESTER_QUICKSTART.md",
+    "docs/TRY_TOGETHER.md",
+    "docs/contracts/requester_git.md",
+    "docs/coordination/NOW.md",
+    "docs/coordination/assignments.json",
+    "docs/coordination/tasks/TH-034.md",
+    "docs/product/12_provider_review.md",
+    "docs/product/13_agent_workflow.md",
+    "docs/verification/TH-034-interactive-requester.md",
+    "package-lock.json",
+    "package.json",
+    "scripts/install-cli.mjs",
+    "scripts/package-cli.mjs",
+    "tests/helpers/terminal-session.py",
+    "tests/requester.test.ts",
+    "tests/wizard.test.ts"
+  ]
+}

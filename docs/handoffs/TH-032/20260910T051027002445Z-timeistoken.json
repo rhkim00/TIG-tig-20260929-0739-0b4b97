@@ -1,0 +1,62 @@
+{
+  "task": "TH-032",
+  "status": "REVIEW",
+  "summary": [
+    "사용자 요청으로 PR #1~#6을 source head CI와 tree 일치 확인 후 merge commit 방식으로 main에 병합. 병합 SHA/시각 보고서 기록.",
+    "새 clone/기존 TH-030 통합/후속 PR base를 main 기준으로 갱신. 기존 worktree·브랜치·개발 DB·과거 handoff 보존. 사람 간 리뷰 미기록 및 TH-001 BLOCKED 유지."
+  ],
+  "checks": [
+    {
+      "command": "gh pr view 1..6; git merge-tree --write-tree origin/main <head>; git rev-parse <ref>^{tree}",
+      "result": "passed",
+      "details": "각 PR의 CI 성공, head 불변, 단계별 병합 tree 일치, 6개 MERGED 확인. main tree가 검증된 PR6 head와 동일."
+    },
+    {
+      "command": "gh run list --branch main",
+      "result": "passed",
+      "details": "main 1fccb0812d4d769f949e4c4ffb7e8bc001561dcd Application checks run 34439689358 및 Workspace checks success. 최신 앱 서버/설치 CLI 34개와 E2E 4개 포함."
+    },
+    {
+      "command": "python3 scripts/check_workspace.py; python3 scripts/check_workflow.py; python3 scripts/check_contracts.py; python3 -m unittest discover -s scripts -p test_team.py; git diff --check",
+      "result": "passed",
+      "details": "문서 링크/필수 필드, 32작업 DAG, 8상태/19전이, 협업 단위 7개, whitespace 통과."
+    }
+  ],
+  "blockers": [
+    "실제 AI runner·구독 증명·외부 OAuth·공개 베타 배포는 후속이며 이번 병합으로 완료되지 않음."
+  ],
+  "next": {
+    "timeistoken": {
+      "task": "TH-032",
+      "action": "문서 PR 검사 후 main 병합과 최종 main CI 확인. 이후 기존 서버/CLI 범위의 실제 runner 격리·구독 검증을 이어갈 것.",
+      "dependsOn": "TH-031 main 병합 완료. 실제 AI 실행은 지원 환경 검증 필요."
+    },
+    "rhkim00": {
+      "task": "TH-030",
+      "action": "본인 브랜치에서 최신 main 반영 후 Inbox/Insights/결과 UX 리뷰 및 연결·설치·실패 복구 온보딩. 후속 PR base main.",
+      "dependsOn": "NOW의 안전한 통합 절차. 자체 변경이 있으면 비교 후 보존·통합."
+    }
+  },
+  "schemaVersion": 1,
+  "author": "timeistoken",
+  "createdAt": "2026-09-10T05:10:26.996344+00:00",
+  "branch": "docs/TH-032-main-integration",
+  "baseCommit": "1fccb0812d4d769f949e4c4ffb7e8bc001561dcd",
+  "files": [
+    "README.md",
+    "START_HERE.md",
+    "docs/COLLABORATION.md",
+    "docs/DEVELOPMENT.md",
+    "docs/coordination/BOARD.md",
+    "docs/coordination/NOW.md",
+    "docs/coordination/assignments.json",
+    "docs/coordination/tasks/TH-001.md",
+    "docs/coordination/tasks/TH-027.md",
+    "docs/coordination/tasks/TH-028.md",
+    "docs/coordination/tasks/TH-029.md",
+    "docs/coordination/tasks/TH-030.md",
+    "docs/coordination/tasks/TH-031.md",
+    "docs/coordination/tasks/TH-032.md",
+    "docs/verification/TH-032-main-integration.md"
+  ]
+}

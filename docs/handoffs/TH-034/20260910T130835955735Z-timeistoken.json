@@ -1,0 +1,74 @@
+{
+  "task": "TH-034",
+  "status": "REVIEW",
+  "summary": [
+    "TIG_test 실사용 피드백 반영: solve this session은 candidate/pending 없이 저장된 상태. 보상 질문이 AI 이후였던 흐름을 수정해 AI 전에 사용자 금액을 수집하며 AI 생성 reward는 사용하지 않음.",
+    "영어 질문에 한글 설명/추가답변 전달, 네/아니요/코덱스/클로드/게시·저장 메뉴 처리와 한글 이름 지원. 같은 폴더 재실행·Continue 질문 축소, 새 파일 포함은 한 번 확인하고 --select-files로 개별 선택.",
+    "CLI0.4.1 서버에 설치. 일반 연결은 저장/내장 주소를 사용하고 release packager가 배포 주소를 주입. 명시 서버 변경은 새 device pairing; 사용자 TIG_test 코드/세션을 제거하거나 공개 게시하지 않음."
+  ],
+  "checks": [
+    {
+      "command": "npm run typecheck; npm run cli:install; tig --version",
+      "result": "passed",
+      "details": "TS 컴파일/최종 패키지 설치0.4.1 및 localhost4173 기본주소 확인."
+    },
+    {
+      "command": "installed CLI requester/wizard focused tests; wizard unit regression",
+      "result": "passed",
+      "details": "요청자/대화형21개, 최종 한국어 부정 응답 회귀 포함 unit10개 통과. PTY solve this→100 티그→새파일 네→AI지원 네→저장→재실행 네 게시. AI9999TIG무시, 실제HTTP/PG/Git; AI/GitHub 경계fixture."
+    },
+    {
+      "command": "TIG_RELEASE_ORIGIN=<test HTTPS origin> npm run cli:pack; tarball inspection; reinstall default",
+      "result": "passed",
+      "details": "실제패키지 내장주소검증. 해당주소네트워크연결없음. 개발기본값으로복구후설치확인."
+    },
+    {
+      "command": "python3 scripts/check_workspace.py; python3 scripts/check_workflow.py; git diff --check",
+      "result": "passed",
+      "details": "문서/34작업DAG/whitespace 통과."
+    }
+  ],
+  "blockers": [
+    "실제 Codex 구독 추론·외부 공개 GitHub 게시·native OS 실증은 기존범위대로 후속. 이번AI한글지시/대화형동작검증은실제추론품질검증아님."
+  ],
+  "next": {
+    "timeistoken": {
+      "task": "TH-034",
+      "action": "PR9최종CI확인 후 사용자가 TIG_test에서 실행중인 구버전CLI를 종료하고0.4.1로누락보상/한글답변/게시흐름확인",
+      "dependsOn": "공개파일과보상은사용자최종확인. main병합결정은유찬."
+    },
+    "rhkim00": {
+      "task": "TH-030",
+      "action": "웹온보딩안내에서주소수동입력제거와한글답변/누락보상선확인흐름반영",
+      "dependsOn": "PR9의최신REQUESTER_QUICKSTART.md와CLI0.4.1"
+    }
+  },
+  "schemaVersion": 1,
+  "author": "timeistoken",
+  "createdAt": "2026-09-10T13:08:35.947934+00:00",
+  "branch": "feat/TH-034-interactive-requester",
+  "baseCommit": "6d90c97a421fcd7baef0182e0cfa6774c7aaf18e",
+  "files": [
+    ".github/workflows/application.yml",
+    "README.md",
+    "apps/cli/src/deployment.ts",
+    "apps/cli/src/local-ai.ts",
+    "apps/cli/src/main.ts",
+    "apps/cli/src/request-answers.ts",
+    "apps/cli/src/terminal.ts",
+    "apps/cli/src/wizard.ts",
+    "docs/REQUESTER_ADVANCED.md",
+    "docs/REQUESTER_QUICKSTART.md",
+    "docs/TRY_TOGETHER.md",
+    "docs/contracts/requester_git.md",
+    "docs/coordination/NOW.md",
+    "docs/coordination/tasks/TH-034.md",
+    "docs/product/00_confirmed.md",
+    "docs/verification/TH-034-interactive-requester.md",
+    "package-lock.json",
+    "package.json",
+    "scripts/package-cli.mjs",
+    "tests/requester.test.ts",
+    "tests/wizard.test.ts"
+  ]
+}

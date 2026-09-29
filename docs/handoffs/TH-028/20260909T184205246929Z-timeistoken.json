@@ -1,0 +1,60 @@
+{
+  "task": "TH-028",
+  "status": "REVIEW",
+  "summary": [
+    "TIG 루트에 최신 앱을 배치하고 기존 worktree와 개발 DB/runtime을 TIG 아래로 통합했습니다. Git 이력과 기존 checkout은 보존했습니다.",
+    "웹/UI는 륜호, 서버/CLI/공통 계약은 유찬으로 명시하고 clone 후 필독 문서, sync/record 도구, 인수인계 필수 hook/CI를 만들었습니다."
+  ],
+  "checks": [
+    {
+      "command": "python3 -m unittest discover -s scripts -p test_team.py",
+      "result": "passed",
+      "details": "7개 테스트: 인계 누락, 경로 범위, 양쪽 다음 행동, 기록 불변성 검증"
+    },
+    {
+      "command": "python3 scripts/check_workspace.py && python3 scripts/check_workflow.py",
+      "result": "passed",
+      "details": "문서 링크/작업 필드/30개 작업 DAG 검사 통과. DB 새 경로 재시작 성공."
+    }
+  ],
+  "blockers": [
+    "기존 정책/앱 PR은 아직 main 미병합. clone은 지정 작업 브랜치에서 시작해야 합니다."
+  ],
+  "next": {
+    "timeistoken": {
+      "task": "TH-029",
+      "action": "두 계정 요청자/수행자 거래와 CLI 설치/테스트를 구현한다.",
+      "dependsOn": "이번 협업/배정 커밋을 stacked 기준으로 사용"
+    },
+    "rhkim00": {
+      "task": "TH-030",
+      "action": "준비되는 웹 브랜치를 clone하고 START_HERE/team sync를 읽은 뒤 웹/UI 개선과 실제 거래 UX를 진행한다.",
+      "dependsOn": "TH-029의 첫 거래 테스트 연결 파일 인계; 디자인/화면 요구 정리는 독립 진행 가능"
+    }
+  },
+  "schemaVersion": 1,
+  "author": "timeistoken",
+  "createdAt": "2026-09-09T18:42:05.243495+00:00",
+  "branch": "docs/TH-028-team-workflow",
+  "baseCommit": "b5b8337c7d45c701d97d500c6c80daa220f5e2e9",
+  "files": [
+    ".githooks/pre-commit",
+    ".github/workflows/handoff.yml",
+    "AGENTS.md",
+    "CLAUDE.md",
+    "README.md",
+    "START_HERE.md",
+    "docs/COLLABORATION.md",
+    "docs/DEVELOPMENT.md",
+    "docs/coordination/BOARD.md",
+    "docs/coordination/NOW.md",
+    "docs/coordination/START_HERE.md",
+    "docs/coordination/WORKFLOW.md",
+    "docs/coordination/assignments.json",
+    "docs/coordination/tasks/TH-028.md",
+    "docs/coordination/tasks/TH-029.md",
+    "docs/coordination/tasks/TH-030.md",
+    "scripts/team.py",
+    "scripts/test_team.py"
+  ]
+}

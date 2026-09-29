@@ -1,0 +1,39 @@
+{
+  "task": "TH-031",
+  "status": "IN_PROGRESS",
+  "summary": [
+    "최신 사용자 승인으로 다음 서버/웹 통합 개발에 착수: 작업 알림함·결과 검토/다운로드·사용자 프로젝트 인사이트. 륜호 작업 브랜치는 보존합니다."
+  ],
+  "checks": [
+    {
+      "command": "team.py sync; tig doctor",
+      "result": "passed",
+      "details": "원격 추가 변경 없음, TH-029 기준 확인. doctor 명령 실행 결과 격리 available=false/executionEnabled=false 확인; 실행 검증 통과를 의미하지 않습니다."
+    }
+  ],
+  "blockers": [
+    "실제 AI 격리 실행은 현재 환경에서 실패하며 후속 검증 필요."
+  ],
+  "next": {
+    "timeistoken": {
+      "task": "TH-031",
+      "action": "알림/개인 집계 DB/API/Worker, 웹 및 CLI와 검증 구현",
+      "dependsOn": "검증된 TH-029 stacked 기준"
+    },
+    "rhkim00": {
+      "task": "TH-030",
+      "action": "이번 웹 선행 변경 후 해당 파일을 받아 모바일/접근성 리뷰 및 남은 온보딩 진행",
+      "dependsOn": "TH-031 인수인계; 본인 브랜치는 보존"
+    }
+  },
+  "schemaVersion": 1,
+  "author": "timeistoken",
+  "createdAt": "2026-09-09T19:10:04.672148+00:00",
+  "branch": "feat/TH-031-inbox-insights",
+  "baseCommit": "572702930411e9695544cf0b951e2f3572063951",
+  "files": [
+    "docs/coordination/NOW.md",
+    "docs/coordination/assignments.json",
+    "docs/coordination/tasks/TH-031.md"
+  ]
+}
